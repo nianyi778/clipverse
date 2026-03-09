@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Globe, ArrowRight } from "lucide-react";
+import { Menu, X, ChevronDown, Globe, ArrowRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavLink {
@@ -30,10 +31,15 @@ const toolsDropdown = [
 ];
 
 export function Navbar() {
+  const { data: session, status } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const isAuthed = status === "authenticated" && !!session?.user;
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 20);
@@ -48,6 +54,9 @@ export function Navbar() {
     function handleClickOutside(e: MouseEvent) {
       if (toolsRef.current && !toolsRef.current.contains(e.target as Node)) {
         setToolsOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -70,7 +79,8 @@ export function Navbar() {
           <svg
             viewBox="0 0 32 32"
             className="size-8 shrink-0 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]"
-            aria-label="ClipVerse logo"
+            role="img"
+            aria-hidden="true"
           >
             <defs>
               <linearGradient id="cv-bg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -151,19 +161,71 @@ export function Navbar() {
             <Globe className="size-3.5" />
             EN
           </button>
-          <a
-            href="/login"
-            className="rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:text-white"
-          >
-            Log in
-          </a>
-          <a
-            href="/register"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_24px_rgba(124,58,237,0.3)]"
-          >
-            Get Started
-            <ArrowRight className="size-3.5" />
-          </a>
+          {isAuthed ? (
+            <div ref={userMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen((p) => !p)}
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+              >
+                {session.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    className="size-6 rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="flex size-6 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white">
+                    {(session.user?.name?.[0] || session.user?.email?.[0] || "U").toUpperCase()}
+                  </div>
+                )}
+                <span className="max-w-[120px] truncate">
+                  {session.user?.name || session.user?.email?.split("@")[0]}
+                </span>
+                <ChevronDown className={cn("size-3 transition-transform", userMenuOpen && "rotate-180")} />
+              </button>
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-white/[0.08] bg-black/90 p-1.5 shadow-2xl backdrop-blur-2xl"
+                  >
+                    <div className="border-b border-white/[0.06] px-3 py-2">
+                      <p className="truncate text-xs text-white/50">{session.user?.email}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="mt-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+                    >
+                      <LogOut className="size-3.5" />
+                      Log out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <>
+              <a
+                href="/login"
+                className="rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:text-white"
+              >
+                Log in
+              </a>
+              <a
+                href="/register"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_24px_rgba(124,58,237,0.3)]"
+              >
+                Get Started
+                <ArrowRight className="size-3.5" />
+              </a>
+            </>
+          )}
         </div>
 
         <button
@@ -217,18 +279,43 @@ export function Navbar() {
                 )
               )}
               <div className="mt-3 flex flex-col gap-2 border-t border-white/[0.06] pt-4">
-                <a
-                  href="/login"
-                  className="px-3 py-2.5 text-white/50 transition-colors hover:text-white"
-                >
-                  Log in
-                </a>
-                <a
-                  href="/register"
-                  className="rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-center text-sm font-medium text-white"
-                >
-                  Get Started Free
-                </a>
+                {isAuthed ? (
+                  <>
+                    <div className="flex items-center gap-2 px-3 py-2">
+                      {session.user?.image ? (
+                        <img src={session.user.image} alt="" className="size-6 rounded-full" referrerPolicy="no-referrer" />
+                      ) : (
+                        <div className="flex size-6 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white">
+                          {(session.user?.name?.[0] || session.user?.email?.[0] || "U").toUpperCase()}
+                        </div>
+                      )}
+                      <span className="truncate text-sm text-white/70">{session.user?.name || session.user?.email?.split("@")[0]}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-white/50 transition-colors hover:bg-white/[0.04] hover:text-white"
+                    >
+                      <LogOut className="size-4" />
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href="/login"
+                      className="px-3 py-2.5 text-white/50 transition-colors hover:text-white"
+                    >
+                      Log in
+                    </a>
+                    <a
+                      href="/register"
+                      className="rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-center text-sm font-medium text-white"
+                    >
+                      Get Started Free
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

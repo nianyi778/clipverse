@@ -22,7 +22,13 @@ app.use("*", async (c, next) => {
   return next();
 });
 
-app.get("/health", (c) => c.json({ ok: true, ts: Date.now() }));
+app.get("/health", (c) => c.json({
+  ok: true,
+  ts: Date.now(),
+  version: process.env.npm_package_version || "0.1.0",
+  buildTime: process.env.BUILD_TIME || "unknown",
+  buildSha: (process.env.BUILD_SHA || "unknown").slice(0, 7),
+}));
 
 const VALID_PLATFORMS = ["youtube", "tiktok", "bilibili", "instagram", "twitter", "facebook", "douyin", "xiaohongshu"];
 

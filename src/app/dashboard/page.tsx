@@ -20,6 +20,10 @@ import {
   RefreshCw,
   Youtube,
   Globe,
+  Plus,
+  Trash2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
@@ -77,6 +81,15 @@ interface ProfileData {
   subscription: { status: string; currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean } | null;
 }
 
+interface ApiKeyRecord {
+  id: string;
+  name: string;
+  keyPreview: string;
+  lastUsedAt: string | null;
+  requestCount: number;
+  createdAt: string;
+}
+
 interface DownloadRecord {
   id: string;
   url: string;
@@ -95,6 +108,13 @@ export default function DashboardPage() {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingDownloads, setLoadingDownloads] = useState(true);
   const [error, setError] = useState("");
+  const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
+  const [loadingKeys, setLoadingKeys] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [creatingKey, setCreatingKey] = useState(false);
+  const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [deletingKeyId, setDeletingKeyId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -116,6 +136,62 @@ export default function DashboardPage() {
       .catch(() => {})
       .finally(() => setLoadingDownloads(false));
   }, [status]);
+
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.plan !== "lifetime" && profile.plan !== "team") return;
+    setLoadingKeys(true);
+    fetch("/api/user/api-keys")
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setApiKeys(d.keys); })
+      .catch(() => {})
+      .finally(() => setLoadingKeys(false));
+  }, [profile]);
+
+  async function handleCreateKey() {
+    setCreatingKey(true);
+    try {
+      const res = await fetch("/api/user/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newKeyName || "My API Key" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewKeyValue(data.key);
+        setNewKeyName("");
+        const newEntry: ApiKeyRecord = {
+          id: data.id,
+          name: data.name,
+          keyPreview: `cv_...${data.key.slice(-8)}`,
+          lastUsedAt: null,
+          requestCount: 0,
+          createdAt: new Date().toISOString(),
+        };
+        setApiKeys((prev) => [newEntry, ...prev]);
+      }
+    } finally {
+      setCreatingKey(false);
+    }
+  }
+
+  async function handleDeleteKey(id: string) {
+    setDeletingKeyId(id);
+    try {
+      const res = await fetch(`/api/user/api-keys/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) setApiKeys((prev) => prev.filter((k) => k.id !== id));
+    } finally {
+      setDeletingKeyId(null);
+    }
+  }
+
+  function handleCopyKey(key: string) {
+    navigator.clipboard.writeText(key).then(() => {
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    });
+  }
 
   if (status === "loading" || (status === "authenticated" && loadingProfile)) {
     return (
@@ -339,15 +415,96 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.25 }}
-              className="mt-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5"
+              className="mt-6 rounded-xl border border-white/[0.06] bg-white/[0.02]"
             >
-              <div className="flex items-center gap-2">
-                <Key className="size-4 text-white/30" />
-                <h2 className="text-sm font-semibold text-white/70">API Access</h2>
+              <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
+                <div className="flex items-center gap-2">
+                  <Key className="size-4 text-white/30" />
+                  <h2 className="text-sm font-semibold text-white/70">API Keys</h2>
+                </div>
+                <span className="text-xs text-white/30">{apiKeys.length}/10 keys</span>
               </div>
-              <p className="mt-2 text-xs text-white/30">
-                API key management coming soon. Your plan includes API access.
-              </p>
+
+              {newKeyValue && (
+                <div className="mx-5 mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] p-4">
+                  <p className="mb-2 text-xs font-medium text-emerald-400">Key created — copy it now, it won&apos;t be shown again</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 truncate rounded bg-black/30 px-3 py-2 font-mono text-xs text-white/80">
+                      {newKeyValue}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyKey(newKeyValue)}
+                      className="shrink-0 rounded-lg border border-white/[0.08] p-2 text-white/50 transition-colors hover:text-white"
+                    >
+                      {copiedKey ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNewKeyValue(null)}
+                    className="mt-2 text-xs text-white/30 hover:text-white/50"
+                  >
+                    I&apos;ve saved it, dismiss
+                  </button>
+                </div>
+              )}
+
+              <div className="p-5">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !creatingKey) handleCreateKey(); }}
+                    placeholder="Key name (e.g. My App)"
+                    maxLength={100}
+                    className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-violet-500/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateKey}
+                    disabled={creatingKey || apiKeys.length >= 10}
+                    className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {creatingKey ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" />}
+                    Generate
+                  </button>
+                </div>
+
+                {loadingKeys ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="size-4 animate-spin text-violet-400/40" />
+                  </div>
+                ) : apiKeys.length === 0 ? (
+                  <p className="mt-4 text-center text-xs text-white/25">No API keys yet. Generate one above.</p>
+                ) : (
+                  <div className="mt-4 divide-y divide-white/[0.04] rounded-lg border border-white/[0.06]">
+                    {apiKeys.map((k) => (
+                      <div key={k.id} className="flex items-center gap-3 px-4 py-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm text-white/80">{k.name}</p>
+                          <code className="text-xs text-white/35 font-mono">{k.keyPreview}</code>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-white/30">{k.requestCount} reqs</p>
+                          {k.lastUsedAt && (
+                            <p className="text-xs text-white/20">{timeAgo(k.lastUsedAt)}</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteKey(k.id)}
+                          disabled={deletingKeyId === k.id}
+                          className="shrink-0 cursor-pointer rounded p-1.5 text-white/20 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40"
+                        >
+                          {deletingKeyId === k.id ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 

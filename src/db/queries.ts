@@ -210,6 +210,29 @@ export async function createApiKey(
   return { id, key };
 }
 
+export async function getUserApiKeys(userId: string) {
+  const rows = await db
+    .select()
+    .from(apiKeys)
+    .where(eq(apiKeys.userId, userId))
+    .orderBy(desc(apiKeys.createdAt));
+  return rows.map((k) => ({
+    id: k.id,
+    name: k.name,
+    keyPreview: `cv_...${k.key.slice(-8)}`,
+    lastUsedAt: k.lastUsedAt,
+    requestCount: k.requestCount,
+    createdAt: k.createdAt,
+  }));
+}
+
+export async function deleteApiKey(id: string, userId: string): Promise<boolean> {
+  const result = await db
+    .delete(apiKeys)
+    .where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
+  return (result as unknown as { affectedRows: number }).affectedRows > 0;
+}
+
 export async function validateApiKey(key: string) {
   const result = await db
     .select()

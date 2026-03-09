@@ -2,7 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Readable } from "node:stream";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, statSync, existsSync } from "node:fs";
 import { extractVideoInfo, extractSubtitles, getDownloadUrl, getMergedDownloadUrl, spawnYtdlpStream } from "./ytdlp.js";
 
 const COOKIES_DIR = process.env.COOKIES_DIR || "/cookies";
@@ -31,6 +31,58 @@ app.get("/health", (c) => c.json({
 }));
 
 const VALID_PLATFORMS = ["youtube", "tiktok", "bilibili", "instagram", "twitter", "facebook", "douyin", "xiaohongshu"];
+
+const PLATFORM_TEST_URLS: Record<string, string> = {
+  youtube:      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  tiktok:       "https://www.tiktok.com/@tiktok/video/7106594312292453675",
+  instagram:    "https://www.instagram.com/p/CUbXQ3_rWYP/",
+  twitter:      "https://x.com/Twitter/status/1445078208190291973",
+  facebook:     "https://www.facebook.com/watch/?v=10153231379946729",
+  bilibili:     "https://www.bilibili.com/video/BV1GJ411x7h7",
+  douyin:       "https://www.douyin.com/video/7153585060275425572",
+  xiaohongshu:  "https://www.xiaohongshu.com/explore/6366983f000000001f019f40",
+};
+
+app.get("/admin/cookies", (c) => {
+  const status = VALID_PLATFORMS.map((platform) => {
+    const path = `${COOKIES_DIR}/${platform}.txt`;
+    if (!existsSync(path)) return { platform, exists: false };
+    const stat = statSync(path);
+    return {
+      platform,
+      exists: true,
+      bytes: stat.size,
+      updatedAt: stat.mtime.toISOString(),
+    };
+  });
+  return c.json({ success: true, cookies: status });
+});
+
+app.post("/admin/cookies/validate", async (c) => {
+  const body = await c.req.json<{ platform?: string }>().catch(() => ({}));
+  const targets = body.platform ? [body.platform] : VALID_PLATFORMS;
+
+  const results = await Promise.all(
+    targets.map(async (platform) => {
+      const path = `${COOKIES_DIR}/${platform}.txt`;
+      if (!existsSync(path)) return { platform, exists: false, valid: false, error: "No cookies file" };
+
+      const testUrl = PLATFORM_TEST_URLS[platform];
+      if (!testUrl) return { platform, exists: true, valid: null, error: "No test URL configured" };
+
+      try {
+        await extractVideoInfo(testUrl);
+        return { platform, exists: true, valid: true };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        const expired = msg.includes("login") || msg.includes("Login") || msg.includes("cookies") || msg.includes("sign in");
+        return { platform, exists: true, valid: false, expired, error: msg.slice(0, 120) };
+      }
+    })
+  );
+
+  return c.json({ success: true, results });
+});
 
 app.post("/admin/cookies", async (c) => {
   if (API_KEY) {

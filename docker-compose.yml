@@ -10,9 +10,7 @@ services:
       - internal
 
   ytdlp-service:
-    build:
-      context: ./ytdlp-service
-      dockerfile: Dockerfile
+    image: ghcr.io/nianyi778/clipverse-ytdlp:latest
     container_name: ytdlp-service
     restart: unless-stopped
     ports:

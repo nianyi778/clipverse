@@ -263,12 +263,12 @@ function detectPlatform(url: string): string {
   const patterns: [string, RegExp[]][] = [
     ["youtube", [/(?:youtube\.com|youtu\.be)/i]],
     ["tiktok", [/tiktok\.com/i]],
-    ["instagram", [/instagram\.com/i]],
+    ["instagram", [/instagram\.com/i, /instagr\.am/i]],
     ["twitter", [/(?:twitter\.com|x\.com)/i]],
     ["bilibili", [/bilibili\.com/i, /b23\.tv/i]],
-    ["xiaohongshu", [/xiaohongshu\.com/i]],
+    ["xiaohongshu", [/xiaohongshu\.com/i, /xhslink\.com/i]],
     ["douyin", [/douyin\.com/i, /iesdouyin\.com/i]],
-    ["facebook", [/facebook\.com/i]],
+    ["facebook", [/facebook\.com/i, /fb\.watch/i]],
   ];
   for (const [name, regs] of patterns) {
     if (regs.some((r) => r.test(url))) return name;

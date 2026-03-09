@@ -3,6 +3,21 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Readable } from "node:stream";
 import { writeFileSync, mkdirSync, statSync, existsSync } from "node:fs";
+
+function expandCookieDomains(content: string, domainMap: Record<string, string>): string {
+  const extra: string[] = [];
+  for (const line of content.split("\n")) {
+    if (line.startsWith("#") || !line.trim()) continue;
+    const parts = line.split("\t");
+    if (parts.length < 7) continue;
+    const from = Object.keys(domainMap).find(d => parts[0] === d || parts[0] === `.${d}` || parts[0] === `www.${d}`);
+    if (from) {
+      extra.push([domainMap[from], ...parts.slice(1)].join("\t"));
+      extra.push([`.${domainMap[from]}`, ...parts.slice(1)].join("\t"));
+    }
+  }
+  return extra.length ? `${content}\n${extra.join("\n")}` : content;
+}
 import { extractVideoInfo, extractSubtitles, getDownloadUrl, getMergedDownloadUrl, spawnYtdlpStream } from "./ytdlp.js";
 
 const COOKIES_DIR = process.env.COOKIES_DIR || "/cookies";
@@ -100,8 +115,14 @@ app.post("/admin/cookies", async (c) => {
     }
     mkdirSync(COOKIES_DIR, { recursive: true });
     const filePath = `${COOKIES_DIR}/${platform}.txt`;
-    writeFileSync(filePath, content, "utf-8");
-    return c.json({ success: true, path: filePath, bytes: content.length });
+    const DOMAIN_EXPANSIONS: Record<string, Record<string, string>> = {
+      douyin: { "douyin.com": "iesdouyin.com" },
+    };
+    const expanded = DOMAIN_EXPANSIONS[platform]
+      ? expandCookieDomains(content, DOMAIN_EXPANSIONS[platform])
+      : content;
+    writeFileSync(filePath, expanded, "utf-8");
+    return c.json({ success: true, path: filePath, bytes: expanded.length });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to save cookies";
     return c.json({ success: false, error: message }, 500);

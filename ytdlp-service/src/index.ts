@@ -27,9 +27,10 @@ app.get("/health", (c) => c.json({ ok: true, ts: Date.now() }));
 const VALID_PLATFORMS = ["youtube", "tiktok", "bilibili", "instagram", "twitter", "facebook", "douyin", "xiaohongshu"];
 
 app.post("/admin/cookies", async (c) => {
-  if (!API_KEY) return c.json({ success: false, error: "API key not configured" }, 403);
-  const key = c.req.header("x-api-key");
-  if (key !== API_KEY) return c.json({ success: false, error: "Unauthorized" }, 401);
+  if (API_KEY) {
+    const key = c.req.header("x-api-key");
+    if (key !== API_KEY) return c.json({ success: false, error: "Unauthorized" }, 401);
+  }
 
   try {
     const { platform, content } = await c.req.json<{ platform: string; content: string }>();

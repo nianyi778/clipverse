@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -11,6 +13,7 @@ import {
   CreditCard,
   Shield,
   Send,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
@@ -244,6 +247,39 @@ function ComparisonCell({ value }: { value: string | boolean }) {
 
 export default function PricingPage() {
   const [yearly, setYearly] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleCheckout = async (tierName: string) => {
+    const plan = tierName.toLowerCase();
+    if (plan === "free") {
+      router.push("/register");
+      return;
+    }
+    if (!session?.user) {
+      router.push("/login");
+      return;
+    }
+    setLoadingPlan(plan);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to start checkout");
+      }
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -415,14 +451,20 @@ export default function PricingPage() {
 
                 <button
                   type="button"
+                  onClick={() => handleCheckout(tier.name)}
+                  disabled={loadingPlan === tier.name.toLowerCase()}
                   className={cn(
-                    "relative w-full cursor-pointer rounded-lg py-2.5 text-sm font-medium transition-all duration-200",
+                    "relative flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60",
                     tier.highlighted
                       ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_24px_rgba(124,58,237,0.3)]"
                       : "border border-white/[0.08] text-white/65 hover:bg-white/[0.04] hover:text-white"
                   )}
                 >
-                  {tier.cta}
+                  {loadingPlan === tier.name.toLowerCase() ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    tier.cta
+                  )}
                 </button>
               </motion.div>
             ))}

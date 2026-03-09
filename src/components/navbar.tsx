@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Globe, ArrowRight, LogOut } from "lucide-react";
+import { Menu, X, ChevronDown, Globe, ArrowRight, LogOut, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavLink {
@@ -197,10 +197,18 @@ export function Navbar() {
                     <div className="border-b border-white/[0.06] px-3 py-2">
                       <p className="truncate text-xs text-white/50">{session.user?.email}</p>
                     </div>
+                    <a
+                      href="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+                    >
+                      <LayoutDashboard className="size-3.5" />
+                      Dashboard
+                    </a>
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: "/" })}
-                      className="mt-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
                     >
                       <LogOut className="size-3.5" />
                       Log out
@@ -291,6 +299,14 @@ export function Navbar() {
                       )}
                       <span className="truncate text-sm text-white/70">{session.user?.name || session.user?.email?.split("@")[0]}</span>
                     </div>
+                    <a
+                      href="/dashboard"
+                      onClick={closeMobile}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-white/50 transition-colors hover:bg-white/[0.04] hover:text-white"
+                    >
+                      <LayoutDashboard className="size-4" />
+                      Dashboard
+                    </a>
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: "/" })}

@@ -2,12 +2,45 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, AlertCircle, RotateCcw, Clock } from "lucide-react";
+import { Search, Loader2, AlertCircle, RotateCcw, Clock, CheckCircle, XCircle, ExternalLink, Globe, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 import { VideoResultCard } from "@/components/video-result-card";
 import type { ParsedVideo, ParseState } from "@/types/video";
+
+interface DownloadRecord {
+  id: string;
+  url: string;
+  platform: string;
+  title: string | null;
+  quality: string | null;
+  status: string;
+  createdAt: string;
+}
+
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function PlatformIcon({ platform }: { platform: string }) {
+  if (platform.toLowerCase() === "youtube") return <Youtube className="size-3.5 text-red-400" />;
+  return <Globe className="size-3.5 text-white/30" />;
+}
+
+const STATUS_ICON: Record<string, React.ReactNode> = {
+  completed: <CheckCircle className="size-3.5 text-emerald-400" />,
+  failed: <XCircle className="size-3.5 text-red-400" />,
+  processing: <Loader2 className="size-3.5 animate-spin text-violet-400" />,
+  pending: <Clock className="size-3.5 text-white/30" />,
+};
 
 const supportedPlatforms = [
   "YouTube",
@@ -24,10 +57,13 @@ const supportedPlatforms = [
 function DownloadPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { status: authStatus } = useSession();
   const [url, setUrl] = useState("");
   const [parseState, setParseState] = useState<ParseState>("idle");
   const [parsedVideo, setParsedVideo] = useState<ParsedVideo | null>(null);
   const [error, setError] = useState("");
+  const [recentDownloads, setRecentDownloads] = useState<DownloadRecord[]>([]);
+  const [loadingRecent, setLoadingRecent] = useState(false);
 
   const handleParse = async (targetUrl?: string) => {
     const parseUrl = targetUrl || url;
@@ -56,6 +92,16 @@ function DownloadPageContent() {
       setParseState("error");
     }
   };
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    setLoadingRecent(true);
+    fetch("/api/user/downloads")
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setRecentDownloads(d.downloads.slice(0, 10)); })
+      .catch(() => {})
+      .finally(() => setLoadingRecent(false));
+  }, [authStatus]);
 
   const hasAutoParseRef = useRef(false);
 
@@ -276,19 +322,59 @@ function DownloadPageContent() {
           )}
         </AnimatePresence>
 
-        <section className="border-t border-white/[0.06] pt-10">
-          <div className="mb-6 flex items-center gap-2">
-            <Clock className="size-4 text-white/25" />
-            <h2 className="text-sm font-semibold text-white/50">
-              Recent Downloads
-            </h2>
-          </div>
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.06] py-12">
-            <p className="text-sm text-white/20">
-              No downloads yet. Paste a video URL above to get started.
-            </p>
-          </div>
-        </section>
+        {authStatus === "authenticated" && (
+          <section className="border-t border-white/[0.06] pt-10">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="size-4 text-white/25" />
+                <h2 className="text-sm font-semibold text-white/50">Recent Downloads</h2>
+              </div>
+              <a href="/dashboard" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                View all →
+              </a>
+            </div>
+
+            {loadingRecent ? (
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="size-5 animate-spin text-violet-400/40" />
+              </div>
+            ) : recentDownloads.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.06] py-12">
+                <p className="text-sm text-white/20">
+                  No downloads yet. Paste a video URL above to get started.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-white/[0.06] divide-y divide-white/[0.04]">
+                {recentDownloads.map((dl) => (
+                  <div key={dl.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.02]">
+                    <PlatformIcon platform={dl.platform} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm text-white/70">{dl.title || dl.url}</p>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-white/30">
+                        <span className="capitalize">{dl.platform}</span>
+                        {dl.quality && <><span>·</span><span>{dl.quality}</span></>}
+                        <span>·</span>
+                        <span>{timeAgo(dl.createdAt)}</span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {STATUS_ICON[dl.status] ?? <Clock className="size-3.5 text-white/20" />}
+                    </div>
+                    <a
+                      href={dl.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 text-white/20 transition-colors hover:text-white/50"
+                    >
+                      <ExternalLink className="size-3.5" />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );

@@ -1,13 +1,15 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "placeholder") {
+const key = process.env.STRIPE_SECRET_KEY;
+const hasStripe = !!key && key !== "placeholder";
+
+if (!hasStripe) {
   console.warn("STRIPE_SECRET_KEY not configured — payment features disabled");
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2026-02-25.clover",
-  typescript: true,
-});
+export const stripe: Stripe | null = hasStripe
+  ? new Stripe(key, { apiVersion: "2026-02-25.clover", typescript: true })
+  : null;
 
 export const PRICE_IDS = {
   pro_monthly: process.env.STRIPE_PRO_PRICE_ID || "",

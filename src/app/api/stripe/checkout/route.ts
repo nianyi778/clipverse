@@ -39,6 +39,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!stripe) {
+      return NextResponse.json(
+        { success: false, error: "Payment is not configured yet" },
+        { status: 503 }
+      );
+    }
+
     const user = await getUserById(session.user.id);
     if (!user) {
       return NextResponse.json(

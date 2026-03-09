@@ -43,7 +43,7 @@ function getPlatformArgs(url: string): string[] {
   const isYouTube = hostname.includes("youtube.com") || hostname.includes("youtu.be");
   const isTikTok = hostname.includes("tiktok.com");
   const isBilibili = hostname.includes("bilibili.com") || hostname.includes("b23.tv");
-  const isDouyin = hostname.includes("douyin.com");
+  const isDouyin = hostname.includes("douyin.com") || hostname.includes("iesdouyin.com");
   const isXiaohongshu = hostname.includes("xiaohongshu.com") || hostname.includes("xhslink.com");
   const isInstagram = hostname.includes("instagram.com");
   const isTwitter = hostname.includes("twitter.com") || hostname.includes("x.com");
@@ -267,7 +267,7 @@ function detectPlatform(url: string): string {
     ["twitter", [/(?:twitter\.com|x\.com)/i]],
     ["bilibili", [/bilibili\.com/i, /b23\.tv/i]],
     ["xiaohongshu", [/xiaohongshu\.com/i]],
-    ["douyin", [/douyin\.com/i]],
+    ["douyin", [/douyin\.com/i, /iesdouyin\.com/i]],
     ["facebook", [/facebook\.com/i]],
   ];
   for (const [name, regs] of patterns) {

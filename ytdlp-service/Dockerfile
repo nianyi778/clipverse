@@ -18,7 +18,12 @@ RUN curl -fsSL https://deno.land/install.sh | sh
 ENV DENO_DIR="/root/.deno"
 ENV PATH="${DENO_DIR}/bin:${PATH}"
 
-RUN pip3 install --break-system-packages --no-cache-dir yt-dlp bgutil-ytdlp-pot-provider
+RUN pip3 install --break-system-packages --no-cache-dir --upgrade \
+    yt-dlp \
+    bgutil-ytdlp-pot-provider \
+    curl_cffi
+
+RUN mkdir -p /cookies && chmod 755 /cookies
 
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules

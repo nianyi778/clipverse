@@ -1,11 +1,13 @@
 import { execFile, spawn, type ChildProcess } from "child_process";
 import { promisify } from "util";
+import { existsSync } from "fs";
 
 const execFileAsync = promisify(execFile);
 
 const YTDLP_BIN = process.env.YTDLP_PATH || "yt-dlp";
 const EXTRACT_TIMEOUT_MS = Number(process.env.YTDLP_TIMEOUT) || 30_000;
 const MAX_BUFFER = 50 * 1024 * 1024;
+const COOKIES_DIR = process.env.COOKIES_DIR || "/cookies";
 
 const PROXY_URL = process.env.PROXY_URL || "";
 const TIKTOK_PROXY = process.env.TIKTOK_PROXY || PROXY_URL;
@@ -14,12 +16,21 @@ const DOUYIN_PROXY = process.env.DOUYIN_PROXY || PROXY_URL;
 const XIAOHONGSHU_PROXY = process.env.XIAOHONGSHU_PROXY || PROXY_URL;
 
 const BGUTIL_POT_URL = process.env.BGUTIL_POT_URL || "";
-const YOUTUBE_COOKIES = process.env.YOUTUBE_COOKIES_FILE || "";
-const TIKTOK_COOKIES = process.env.TIKTOK_COOKIES_FILE || "";
-const BILIBILI_COOKIES = process.env.BILIBILI_COOKIES_FILE || "";
+const YOUTUBE_COOKIES = process.env.YOUTUBE_COOKIES_FILE || `${COOKIES_DIR}/youtube.txt`;
+const TIKTOK_COOKIES = process.env.TIKTOK_COOKIES_FILE || `${COOKIES_DIR}/tiktok.txt`;
+const BILIBILI_COOKIES = process.env.BILIBILI_COOKIES_FILE || `${COOKIES_DIR}/bilibili.txt`;
+const INSTAGRAM_COOKIES = process.env.INSTAGRAM_COOKIES_FILE || `${COOKIES_DIR}/instagram.txt`;
+const TWITTER_COOKIES = process.env.TWITTER_COOKIES_FILE || `${COOKIES_DIR}/twitter.txt`;
+const FACEBOOK_COOKIES = process.env.FACEBOOK_COOKIES_FILE || `${COOKIES_DIR}/facebook.txt`;
+const DOUYIN_COOKIES = process.env.DOUYIN_COOKIES_FILE || `${COOKIES_DIR}/douyin.txt`;
+const XIAOHONGSHU_COOKIES = process.env.XIAOHONGSHU_COOKIES_FILE || `${COOKIES_DIR}/xiaohongshu.txt`;
 const COOKIES_FILE = process.env.COOKIES_FILE || "";
 
 const BASE_ARGS = ["--js-runtimes", "deno", "--no-check-certificates"];
+
+function cookiesArg(path: string): string[] {
+  return path && existsSync(path) ? ["--cookies", path] : [];
+}
 
 function getHostname(url: string): string {
   try { return new URL(url).hostname; } catch { return ""; }
@@ -33,34 +44,56 @@ function getPlatformArgs(url: string): string[] {
   const isTikTok = hostname.includes("tiktok.com");
   const isBilibili = hostname.includes("bilibili.com") || hostname.includes("b23.tv");
   const isDouyin = hostname.includes("douyin.com");
-  const isXiaohongshu = hostname.includes("xiaohongshu.com");
+  const isXiaohongshu = hostname.includes("xiaohongshu.com") || hostname.includes("xhslink.com");
+  const isInstagram = hostname.includes("instagram.com");
+  const isTwitter = hostname.includes("twitter.com") || hostname.includes("x.com");
+  const isFacebook = hostname.includes("facebook.com") || hostname.includes("fb.watch");
 
   if (isYouTube) {
     if (BGUTIL_POT_URL) {
       extra.push("--extractor-args", "youtube:player_client=mweb");
       extra.push("--extractor-args", `youtubepot-bgutilhttp:base_url=${BGUTIL_POT_URL}`);
     }
-    if (YOUTUBE_COOKIES) extra.push("--cookies", YOUTUBE_COOKIES);
+    extra.push(...cookiesArg(YOUTUBE_COOKIES));
   }
 
   if (isTikTok) {
     if (TIKTOK_PROXY) extra.push("--proxy", TIKTOK_PROXY);
-    if (TIKTOK_COOKIES) extra.push("--cookies", TIKTOK_COOKIES);
+    extra.push(...cookiesArg(TIKTOK_COOKIES));
     extra.push("--xff", "US");
   }
 
   if (isBilibili) {
     if (BILIBILI_PROXY) extra.push("--proxy", BILIBILI_PROXY);
-    if (BILIBILI_COOKIES) extra.push("--cookies", BILIBILI_COOKIES);
+    extra.push(...cookiesArg(BILIBILI_COOKIES));
   }
 
   if (isDouyin) {
     if (DOUYIN_PROXY) extra.push("--proxy", DOUYIN_PROXY);
-    if (TIKTOK_COOKIES) extra.push("--cookies", TIKTOK_COOKIES);
+    extra.push(...cookiesArg(DOUYIN_COOKIES));
+    extra.push("--extractor-args", "douyin:app_name=trill");
+  }
+
+  if (isInstagram) {
+    extra.push(...cookiesArg(INSTAGRAM_COOKIES));
+    extra.push("--impersonate", "chrome-124");
+  }
+
+  if (isTwitter) {
+    extra.push(...cookiesArg(TWITTER_COOKIES));
+    extra.push("--impersonate", "chrome-124");
+  }
+
+  if (isFacebook) {
+    extra.push(...cookiesArg(FACEBOOK_COOKIES));
+    extra.push("--impersonate", "chrome-99");
+    extra.push("--extractor-args", "facebook:formats=dash_sd_src,dash_hd_src,sd_src,hd_src");
   }
 
   if (isXiaohongshu) {
     if (XIAOHONGSHU_PROXY) extra.push("--proxy", XIAOHONGSHU_PROXY);
+    extra.push(...cookiesArg(XIAOHONGSHU_COOKIES));
+    extra.push("--impersonate", "chrome-124");
   }
 
   if (COOKIES_FILE && !extra.includes("--cookies")) {
@@ -195,6 +228,17 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
     if (stderr.includes("Sign in to confirm your age")) {
       throw new Error("This video requires age verification and cannot be downloaded");
     }
+    if (
+      stderr.includes("login required") ||
+      stderr.includes("Login required") ||
+      stderr.includes("not logged in") ||
+      stderr.includes("cookies") ||
+      stderr.includes("This content is only available to logged-in users") ||
+      stderr.includes("Please log in") ||
+      stderr.includes("You need to log in")
+    ) {
+      throw new Error("This video requires login. Please try a different video.");
+    }
     if (stderr.includes("Unsupported URL")) {
       throw new Error("This URL is not supported. Please try a different link.");
     }
@@ -203,6 +247,9 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
     }
     if (stderr.includes("HTTP Error 403")) {
       throw new Error("Access denied by the platform. The video may be geo-restricted.");
+    }
+    if (stderr.includes("HTTP Error 404") || stderr.includes("404")) {
+      throw new Error("Video not found. It may have been deleted or the URL is incorrect.");
     }
     if (stderr.includes("ENOENT") || stderr.includes("not found")) {
       throw new Error("yt-dlp is not installed on the server.");

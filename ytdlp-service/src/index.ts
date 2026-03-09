@@ -2,7 +2,10 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Readable } from "node:stream";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { extractVideoInfo, extractSubtitles, getDownloadUrl, getMergedDownloadUrl, spawnYtdlpStream } from "./ytdlp.js";
+
+const COOKIES_DIR = process.env.COOKIES_DIR || "/cookies";
 
 const app = new Hono();
 const API_KEY = process.env.YTDLP_API_KEY || "";
@@ -20,6 +23,31 @@ app.use("*", async (c, next) => {
 });
 
 app.get("/health", (c) => c.json({ ok: true, ts: Date.now() }));
+
+const VALID_PLATFORMS = ["youtube", "tiktok", "bilibili", "instagram", "twitter", "facebook", "douyin", "xiaohongshu"];
+
+app.post("/admin/cookies", async (c) => {
+  if (!API_KEY) return c.json({ success: false, error: "API key not configured" }, 403);
+  const key = c.req.header("x-api-key");
+  if (key !== API_KEY) return c.json({ success: false, error: "Unauthorized" }, 401);
+
+  try {
+    const { platform, content } = await c.req.json<{ platform: string; content: string }>();
+    if (!platform || !VALID_PLATFORMS.includes(platform)) {
+      return c.json({ success: false, error: `Invalid platform. Use: ${VALID_PLATFORMS.join(", ")}` }, 400);
+    }
+    if (!content || typeof content !== "string") {
+      return c.json({ success: false, error: "content (cookies.txt text) is required" }, 400);
+    }
+    mkdirSync(COOKIES_DIR, { recursive: true });
+    const filePath = `${COOKIES_DIR}/${platform}.txt`;
+    writeFileSync(filePath, content, "utf-8");
+    return c.json({ success: true, path: filePath, bytes: content.length });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to save cookies";
+    return c.json({ success: false, error: message }, 500);
+  }
+});
 
 app.post("/parse", async (c) => {
   try {

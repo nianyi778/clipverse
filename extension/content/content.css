@@ -1,0 +1,145 @@
+/* ClipVerse Download Button */
+#clipverse-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  margin: 8px 0;
+  position: relative;
+  animation: clipverse-pulse 1.5s ease-out;
+}
+
+/* Pulse animation on first injection */
+@keyframes clipverse-pulse {
+  0% {
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  }
+  30% {
+    box-shadow: 0 0 0 8px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(124, 58, 237, 0.3);
+  }
+  60% {
+    box-shadow: 0 0 0 16px rgba(124, 58, 237, 0), 0 2px 8px rgba(124, 58, 237, 0.3);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  }
+}
+
+#clipverse-download-btn:hover {
+  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.45);
+  transform: translateY(-1px);
+}
+
+#clipverse-download-btn:active {
+  transform: translateY(0);
+}
+
+#clipverse-download-btn svg {
+  flex-shrink: 0;
+}
+
+/* Hover tooltip */
+#clipverse-download-btn::after {
+  content: attr(data-clipverse-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: rgba(10, 10, 10, 0.92);
+  color: #e2e2e2;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+#clipverse-download-btn:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Dark theme variant (default) */
+@media (prefers-color-scheme: dark) {
+  #clipverse-download-btn {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+  }
+}
+
+/* Light theme variant */
+@media (prefers-color-scheme: light) {
+  #clipverse-download-btn {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(124, 58, 237, 0.25);
+  }
+
+  #clipverse-download-btn::after {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a1a;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Responsive: smaller on mobile viewports */
+@media (max-width: 640px) {
+  #clipverse-download-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  #clipverse-download-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Toast notification */
+#clipverse-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2147483647;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 24px rgba(124, 58, 237, 0.4);
+  pointer-events: none;
+}
+
+#clipverse-toast.clipverse-toast-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+#clipverse-toast.clipverse-toast-exit {
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+}

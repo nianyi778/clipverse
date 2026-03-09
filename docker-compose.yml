@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  bgutil-provider:
+    image: brainicism/bgutil-ytdlp-pot-provider:latest
+    container_name: bgutil-provider
+    restart: unless-stopped
+    init: true
+    networks:
+      - internal
+
+  ytdlp-service:
+    build:
+      context: ./ytdlp-service
+      dockerfile: Dockerfile
+    container_name: ytdlp-service
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      PORT: "8787"
+      YTDLP_API_KEY: ${YTDLP_API_KEY:-}
+      BGUTIL_POT_URL: http://bgutil-provider:4416
+      PROXY_URL: ${PROXY_URL:-}
+      TIKTOK_PROXY: ${TIKTOK_PROXY:-}
+      BILIBILI_PROXY: ${BILIBILI_PROXY:-}
+      DOUYIN_PROXY: ${DOUYIN_PROXY:-}
+      XIAOHONGSHU_PROXY: ${XIAOHONGSHU_PROXY:-}
+      YOUTUBE_COOKIES_FILE: /secrets/youtube-cookies.txt
+      TIKTOK_COOKIES_FILE: /secrets/tiktok-cookies.txt
+      BILIBILI_COOKIES_FILE: /secrets/bilibili-cookies.txt
+    volumes:
+      - ./secrets:/secrets:ro
+    depends_on:
+      - bgutil-provider
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

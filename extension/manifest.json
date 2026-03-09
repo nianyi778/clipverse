@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "ClipVerse — Video Downloader",
+  "version": "1.0.0",
+  "description": "Download videos from YouTube, TikTok, Instagram, Bilibili & 50+ platforms with one click.",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.youtu.be/*",
+    "*://*.tiktok.com/*",
+    "*://*.instagram.com/*",
+    "*://*.twitter.com/*",
+    "*://*.x.com/*",
+    "*://*.bilibili.com/*",
+    "*://*.b23.tv/*",
+    "*://*.xiaohongshu.com/*",
+    "*://*.douyin.com/*",
+    "*://*.facebook.com/*",
+    "*://*.vimeo.com/*",
+    "*://*.pinterest.com/*",
+    "*://*.threads.net/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.svg",
+      "48": "icons/icon-48.svg",
+      "128": "icons/icon-128.svg"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://*.tiktok.com/*",
+        "*://*.instagram.com/*",
+        "*://*.twitter.com/*",
+        "*://*.x.com/*",
+        "*://*.bilibili.com/*",
+        "*://*.xiaohongshu.com/*",
+        "*://*.douyin.com/*",
+        "*://*.facebook.com/*",
+        "*://*.vimeo.com/*",
+        "*://*.pinterest.com/*",
+        "*://*.threads.net/*"
+      ],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+D",
+        "mac": "Command+Shift+D"
+      },
+      "description": "Download current video"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.svg",
+    "48": "icons/icon-48.svg",
+    "128": "icons/icon-128.svg"
+  }
+}

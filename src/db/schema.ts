@@ -22,6 +22,10 @@ export const users = mysqlTable("users", {
   stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
   dailyDownloads: int("daily_downloads").notNull().default(0),
   dailyDownloadsReset: varchar("daily_downloads_reset", { length: 10 }),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  emailVerifyToken: varchar("email_verify_token", { length: 100 }),
+  passwordResetToken: varchar("password_reset_token", { length: 100 }),
+  passwordResetExpires: timestamp("password_reset_expires"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });

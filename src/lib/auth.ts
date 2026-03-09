@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { getUserByEmail, upsertGoogleUser } from "@/db/queries";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -24,12 +25,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!user.passwordHash) return null;
 
-        const hash = crypto
-          .createHash("sha256")
-          .update(credentials.password as string)
-          .digest("hex");
-
-        if (hash !== user.passwordHash) return null;
+        const pw = credentials.password as string;
+        let valid = false;
+        if (user.passwordHash.startsWith("$2")) {
+          valid = await bcrypt.compare(pw, user.passwordHash);
+        } else {
+          const sha = crypto.createHash("sha256").update(pw).digest("hex");
+          valid = sha === user.passwordHash;
+        }
+        if (!valid) return null;
 
         return { id: user.id, email: user.email, name: user.name };
       },

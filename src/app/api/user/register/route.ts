@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createUser, getUserByEmail } from "@/db/queries";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { createUser, getUserByEmail, setEmailVerifyToken } from "@/db/queries";
+import { sendVerificationEmail } from "@/lib/resend";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,16 +35,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const passwordHash = crypto
-      .createHash("sha256")
-      .update(password)
-      .digest("hex");
+    const passwordHash = await bcrypt.hash(password, 12);
 
     const userId = await createUser({
       email,
       name: name || email.split("@")[0],
       passwordHash,
     });
+
+    const verifyToken = crypto.randomBytes(32).toString("hex");
+    await setEmailVerifyToken(userId, verifyToken);
+    sendVerificationEmail(email, verifyToken).catch(() => {});
 
     return NextResponse.json({ success: true, userId });
   } catch (error) {

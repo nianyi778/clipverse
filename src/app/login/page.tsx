@@ -171,18 +171,27 @@ function LoginPageContent() {
               />
             </div>
 
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/25" />
-              <input
-                type="password"
-                placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={mode === "register" ? 8 : undefined}
-                disabled={loading}
-                className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 pl-11 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-violet-500/40 disabled:opacity-50"
-              />
+            <div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/25" />
+                <input
+                  type="password"
+                  placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={mode === "register" ? 8 : undefined}
+                  disabled={loading}
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 pl-11 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-violet-500/40 disabled:opacity-50"
+                />
+              </div>
+              {mode === "login" && (
+                <div className="mt-1.5 text-right">
+                  <a href="/forgot-password" className="text-xs text-white/30 hover:text-violet-400 transition-colors">
+                    Forgot password?
+                  </a>
+                </div>
+              )}
             </div>
 
             <button

@@ -200,6 +200,37 @@ export async function getActiveSubscription(userId: string) {
   return result[0] ?? null;
 }
 
+export async function setEmailVerifyToken(userId: string, token: string): Promise<void> {
+  await db.update(users).set({ emailVerifyToken: token }).where(eq(users.id, userId));
+}
+
+export async function verifyEmailToken(token: string): Promise<boolean> {
+  const result = await db.select().from(users).where(eq(users.emailVerifyToken, token)).limit(1);
+  if (!result[0]) return false;
+  await db.update(users).set({ emailVerified: true, emailVerifyToken: null }).where(eq(users.id, result[0].id));
+  return true;
+}
+
+export async function setPasswordResetToken(
+  email: string,
+  token: string,
+  expires: Date
+): Promise<boolean> {
+  const user = await getUserByEmail(email);
+  if (!user) return false;
+  await db.update(users).set({ passwordResetToken: token, passwordResetExpires: expires }).where(eq(users.id, user.id));
+  return true;
+}
+
+export async function getUserByResetToken(token: string) {
+  const result = await db.select().from(users).where(eq(users.passwordResetToken, token)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function resetUserPassword(userId: string, passwordHash: string): Promise<void> {
+  await db.update(users).set({ passwordHash, passwordResetToken: null, passwordResetExpires: null }).where(eq(users.id, userId));
+}
+
 export async function createApiKey(
   userId: string,
   name: string

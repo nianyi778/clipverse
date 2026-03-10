@@ -71,7 +71,6 @@ function getPlatformArgs(url: string): string[] {
   if (isDouyin) {
     if (DOUYIN_PROXY) extra.push("--proxy", DOUYIN_PROXY);
     extra.push(...cookiesArg(DOUYIN_COOKIES));
-    extra.push("--extractor-args", "douyin:app_name=trill");
   }
 
   if (isInstagram) {

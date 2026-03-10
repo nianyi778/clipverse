@@ -2,6 +2,8 @@ import { execFile, spawn, type ChildProcess } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
 
+import { fetchDouyinVideo, isDouyinUrl } from "./douyin-api.js";
+
 const execFileAsync = promisify(execFile);
 
 const YTDLP_BIN = process.env.YTDLP_PATH || "yt-dlp";

@@ -230,13 +230,14 @@ app.get("/stream", async (c) => {
   if (!child.stdout) return c.json({ error: "Failed to start stream" }, 500);
 
   const safeFilename = sanitizeDownloadFilename(filename);
+  const asciiFilename = [...safeFilename].map(c => c.charCodeAt(0) > 127 ? "_" : c).join("");
   const encodedFilename = encodeURIComponent(safeFilename);
   const webStream = Readable.toWeb(child.stdout) as ReadableStream;
 
   return new Response(webStream, {
     headers: {
       "Content-Type": "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`,
+      "Content-Disposition": `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
       "Cache-Control": "no-cache",
     },
   });
@@ -288,11 +289,12 @@ app.get("/proxy", async (c) => {
     const contentType = upstream.headers.get("content-type") || "application/octet-stream";
     const contentLength = upstream.headers.get("content-length");
     const safeFilename = sanitizeDownloadFilename(filename);
+    const asciiFilename = [...safeFilename].map(c => c.charCodeAt(0) > 127 ? "_" : c).join("");
     const encodedFilename = encodeURIComponent(safeFilename);
 
     const headers: Record<string, string> = {
       "Content-Type": contentType,
-      "Content-Disposition": `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`,
+      "Content-Disposition": `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
       "Cache-Control": "no-cache",
     };
     if (contentLength) headers["Content-Length"] = contentLength;

@@ -283,7 +283,8 @@ app.get("/proxy", async (c) => {
 
     if (!upstream.ok || !upstream.body) {
       console.error(`[proxy] Upstream error: ${upstream.status} ${upstream.statusText} for ${url}`);
-      return c.json({ error: `Upstream returned ${upstream.status}` }, 502);
+      const errorHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Download Failed</title></head><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0a0a0a;color:#fff;flex-direction:column;gap:16px"><h1 style="margin:0">Download Failed</h1><p style="margin:0;color:#888">The video URL has expired (${upstream.status}). Please go back and try again.</p><a href="javascript:history.back()" style="color:#8b5cf6">← Go Back</a></body></html>`;
+      return new Response(errorHtml, { status: 502, headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
 
     const contentType = upstream.headers.get("content-type") || "application/octet-stream";

@@ -57,7 +57,7 @@ const supportedPlatforms = [
 function extractUrl(input: string): string {
   const trimmed = input.trim();
   try { new URL(trimmed); return trimmed; } catch {}
-  const match = trimmed.match(/https?:\/\/[^\s\u3000-\u9fff\uff00-\uffef]+/);
+  const match = trimmed.match(/https?:\/\/[^\s\u3000-\u9fff\uff00-\uffef\u{1F000}-\u{1FFFF}]+/u);
   if (match) return match[0].replace(/[^\w\-._~:/?#[\]@!$&'()*+,;=%]+$/, "");
   return trimmed;
 }
@@ -81,9 +81,8 @@ function DownloadPageContent() {
       return;
     }
     const parseUrl = extractUrl(raw);
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set("url", raw.trim());
-    router.replace(`/download?${newParams.toString()}`, { scroll: false });
+    setUrl(parseUrl);
+    hasAutoParseRef.current = true;
     try {
       setParseState("parsing");
       setError("");
@@ -96,6 +95,9 @@ function DownloadPageContent() {
       if (!data.success) throw new Error(data.error || "Failed to parse video");
       setParsedVideo(data.data);
       setParseState("success");
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("url", parseUrl);
+      router.replace(`/download?${newParams.toString()}`, { scroll: false });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to parse video");
       setParseState("error");
@@ -119,7 +121,7 @@ function DownloadPageContent() {
     if (urlParam && !hasAutoParseRef.current) {
       hasAutoParseRef.current = true;
       const cleanUrl = extractUrl(urlParam);
-      setUrl(cleanUrl);
+      setUrl((prev) => prev || cleanUrl);
       (async () => {
         try {
           setParseState("parsing");
@@ -146,6 +148,7 @@ function DownloadPageContent() {
     setParsedVideo(null);
     setParseState("idle");
     setError("");
+    hasAutoParseRef.current = false;
     router.replace("/download", { scroll: false });
   };
 

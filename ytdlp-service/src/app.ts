@@ -60,7 +60,7 @@ app.get("/admin/cookies", (c) => {
 });
 
 app.post("/admin/cookies/validate", async (c) => {
-  const body = await c.req.json<{ platform?: string }>().catch(() => ({}));
+  const body = await c.req.json<{ platform?: string }>().catch(() => ({ platform: undefined }));
   const targets = body.platform ? [body.platform] : VALID_PLATFORMS;
   const cookiesDir = getCookiesDir();
 
@@ -229,13 +229,14 @@ app.get("/stream", async (c) => {
   const child = spawnYtdlpStream(url, formatId, audioFormatId);
   if (!child.stdout) return c.json({ error: "Failed to start stream" }, 500);
 
-  const safeFilename = filename.replace(/[^\w\s\-_.()]/g, "_");
+  const safeFilename = sanitizeDownloadFilename(filename);
+  const encodedFilename = encodeURIComponent(safeFilename);
   const webStream = Readable.toWeb(child.stdout) as ReadableStream;
 
   return new Response(webStream, {
     headers: {
       "Content-Type": "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${safeFilename}"`,
+      "Content-Disposition": `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`,
       "Cache-Control": "no-cache",
     },
   });
@@ -257,7 +258,7 @@ app.get("/proxy", async (c) => {
 
   const contentType = upstream.headers.get("content-type") || "application/octet-stream";
   const contentLength = upstream.headers.get("content-length");
-  const safeFilename = filename.replace(/[^\w\s\-_.()]/g, "_");
+  const safeFilename = sanitizeDownloadFilename(filename);
 
   const headers: Record<string, string> = {
     "Content-Type": contentType,
@@ -276,4 +277,8 @@ function isValidUrl(input: string): boolean {
   } catch {
     return false;
   }
+}
+
+function sanitizeDownloadFilename(name: string): string {
+  return name.replace(new RegExp("[<>:\"/\\\\|?*]|[\\x00-\\x1f]", "g"), "_").trim();
 }

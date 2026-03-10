@@ -182,7 +182,7 @@ export async function extractSubtitles(url: string) {
 }
 
 export async function getDownloadUrl(url: string, formatId: string) {
-  const raw = await runYtdlp(url, ["-f", formatId, "--get-url", "--get-filename", "--no-warnings"]);
+  const raw = await runYtdlp(url, ["-f", formatId, "-o", "%(title)s.%(ext)s", "--get-url", "--get-filename", "--no-warnings"]);
   const lines = raw.trim().split("\n").filter(Boolean);
   return {
     streamUrl: lines[0] || "",

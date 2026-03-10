@@ -2,8 +2,6 @@ import { execFile, spawn, type ChildProcess } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
 
-import { fetchDouyinVideo, isDouyinUrl } from "./douyin-api.js";
-
 const execFileAsync = promisify(execFile);
 
 const YTDLP_BIN = process.env.YTDLP_PATH || "yt-dlp";
@@ -169,76 +167,16 @@ export function spawnYtdlpStream(url: string, formatId: string, audioFormatId?: 
 }
 
 export async function extractVideoInfo(url: string) {
-  // Try yt-dlp first
-  let ytdlpError: Error | null = null;
-  try {
-    const raw = await runYtdlp(url, ["-j", "--no-download", "--no-warnings", "--no-playlist"]);
-    const data: YtdlpResult = JSON.parse(raw);
-    if (data._type === "playlist") {
-      throw new Error("Playlist URLs are not supported. Please paste a single video link.");
-    }
-    const result = mapToParsedVideo(data, url);
-    if (result.videoFormats.length === 0 && result.audioFormats.length === 0) {
-      throw new Error("No downloadable video found at this URL. The post may be image-only or the format is not supported.");
-    }
-    return result;
-  } catch (error) {
-    ytdlpError = error as Error;
-    console.log(`[extractVideoInfo] yt-dlp failed: ${ytdlpError.message}`);
+  const raw = await runYtdlp(url, ["-j", "--no-download", "--no-warnings", "--no-playlist"]);
+  const data: YtdlpResult = JSON.parse(raw);
+  if (data._type === "playlist") {
+    throw new Error("Playlist URLs are not supported. Please paste a single video link.");
   }
-
-  // Fallback to Douyin API for douyin URLs
-  if (isDouyinUrl(url)) {
-    console.log("[extractVideoInfo] Trying Douyin API fallback...");
-    const douyinResult = await fetchDouyinVideo(url);
-    if (douyinResult) {
-      console.log("[extractVideoInfo] Douyin API succeeded");
-      return mapDouyinToVideoInfo(douyinResult, url);
-    }
-    console.log("[extractVideoInfo] Douyin API fallback failed");
+  const result = mapToParsedVideo(data, url);
+  if (result.videoFormats.length === 0 && result.audioFormats.length === 0) {
+    throw new Error("No downloadable video found at this URL. The post may be image-only or the format is not supported.");
   }
-
-  // Re-throw original error if all fallbacks failed
-  throw ytdlpError || new Error("Failed to extract video information");
-}
-
-function mapDouyinToVideoInfo(data: {
-  title: string;
-  thumbnail: string;
-  duration: number;
-  videoUrl: string;
-  author: string;
-  width: number;
-  height: number;
-}, originalUrl: string) {
-  const height = data.height || 720;
-  const quality = heightToQuality(height);
-
-  return {
-    id: `douyin_${Date.now()}`,
-    url: originalUrl,
-    platform: "douyin",
-    title: data.title,
-    description: undefined,
-    thumbnail: data.thumbnail,
-    duration: data.duration,
-    author: data.author,
-    uploadDate: undefined,
-    viewCount: undefined,
-    mediaType: "video",
-    videoFormats: [{
-      formatId: "douyin_direct",
-      quality,
-      codec: "H.264",
-      container: "mp4",
-      fileSize: undefined,
-      hasAudio: true,
-      fps: undefined,
-      bitrate: undefined,
-    }],
-    audioFormats: [],
-    subtitles: undefined,
-  };
+  return result;
 }
 
 export async function extractSubtitles(url: string) {
@@ -251,17 +189,6 @@ export async function extractSubtitles(url: string) {
 }
 
 export async function getDownloadUrl(url: string, formatId: string) {
-  if (formatId === "douyin_direct" && isDouyinUrl(url)) {
-    const douyinResult = await fetchDouyinVideo(url);
-    if (douyinResult) {
-      return {
-        streamUrl: douyinResult.videoUrl,
-        filename: sanitizeFilename(douyinResult.title || "douyin_video") + ".mp4",
-      };
-    }
-    throw new Error("Failed to get Douyin video URL");
-  }
-
   const raw = await runYtdlp(url, ["-f", formatId, "-o", "%(title)s.%(ext)s", "--get-url", "--get-filename", "--no-warnings"]);
   const lines = raw.trim().split("\n").filter(Boolean);
   return {
@@ -271,17 +198,6 @@ export async function getDownloadUrl(url: string, formatId: string) {
 }
 
 export async function getMergedDownloadUrl(url: string, videoFormatId: string, audioFormatId?: string) {
-  if (videoFormatId === "douyin_direct" && isDouyinUrl(url)) {
-    const douyinResult = await fetchDouyinVideo(url);
-    if (douyinResult) {
-      return {
-        streamUrl: douyinResult.videoUrl,
-        filename: sanitizeFilename(douyinResult.title || "douyin_video") + ".mp4",
-      };
-    }
-    throw new Error("Failed to get Douyin video URL");
-  }
-
   const formatSpec = audioFormatId ? `${videoFormatId}+${audioFormatId}` : videoFormatId;
 
   const jsonRaw = await runYtdlp(url, ["-f", formatSpec, "-j", "--no-download", "--no-warnings"]);

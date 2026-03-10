@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import random
 import time
 from urllib.parse import urlencode
+from gmssl import sm3, func
 
 
 class ABogus:
@@ -360,9 +361,12 @@ class ABogus:
 
     @classmethod
     def sm3_to_array(cls, data):
-        if isinstance(data, (bytes, bytearray)):
-            data = list(data)
-        return cls().sum(data)
+        if isinstance(data, str):
+            b = data.encode("utf-8")
+        else:
+            b = bytes(data)
+        h = sm3.sm3_hash(func.bytes_to_list(b))
+        return [int(h[i : i + 2], 16) for i in range(0, len(h), 2)]
 
     @staticmethod
     def rc4_encrypt(plaintext, key):

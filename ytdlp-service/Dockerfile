@@ -21,7 +21,8 @@ ENV PATH="${DENO_DIR}/bin:${PATH}"
 RUN pip3 install --break-system-packages --no-cache-dir --upgrade \
     yt-dlp \
     bgutil-ytdlp-pot-provider \
-    curl_cffi
+    curl_cffi \
+    gmssl
 
 RUN mkdir -p /cookies && chmod 755 /cookies
 

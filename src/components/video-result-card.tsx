@@ -186,7 +186,7 @@ export function VideoResultCard({ video }: { video: ParsedVideo }) {
           >
             <Play className="ml-0.5 size-5 fill-white text-white" />
           </a>
-          {video.duration !== undefined && (
+          {video.duration != null && (
             <span className="absolute bottom-2.5 right-2.5 rounded-md bg-black/70 px-2 py-0.5 font-mono text-xs font-medium text-white/90 backdrop-blur-sm">
               {formatDuration(video.duration)}
             </span>
@@ -214,7 +214,7 @@ export function VideoResultCard({ video }: { video: ParsedVideo }) {
                 {video.author}
               </span>
             )}
-            {video.viewCount !== undefined && (
+            {video.viewCount != null && (
               <span className="flex items-center gap-1">
                 <Eye className="size-3" />
                 {formatViewCount(video.viewCount)} views

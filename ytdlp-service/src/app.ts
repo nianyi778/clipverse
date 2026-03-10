@@ -248,26 +248,45 @@ app.get("/proxy", async (c) => {
 
   if (!url) return c.json({ error: "Missing url parameter" }, 400);
 
-  const upstream = await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-  });
+  try {
+    const parsedUrl = new URL(url);
+    const referer = `${parsedUrl.protocol}//${parsedUrl.hostname}/`;
 
-  if (!upstream.ok || !upstream.body) {
-    return c.json({ error: `Upstream returned ${upstream.status}` }, 502);
+    const upstream = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+        "Referer": referer,
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "identity",
+        "Connection": "keep-alive",
+      },
+      redirect: "follow",
+    });
+
+    if (!upstream.ok || !upstream.body) {
+      console.error(`[proxy] Upstream error: ${upstream.status} ${upstream.statusText} for ${url}`);
+      return c.json({ error: `Upstream returned ${upstream.status}` }, 502);
+    }
+
+    const contentType = upstream.headers.get("content-type") || "application/octet-stream";
+    const contentLength = upstream.headers.get("content-length");
+    const safeFilename = sanitizeDownloadFilename(filename);
+    const encodedFilename = encodeURIComponent(safeFilename);
+
+    const headers: Record<string, string> = {
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`,
+      "Cache-Control": "no-cache",
+    };
+    if (contentLength) headers["Content-Length"] = contentLength;
+
+    return new Response(upstream.body, { status: 200, headers });
+  } catch (error) {
+    console.error(`[proxy] Fetch error for ${url}:`, error);
+    const message = error instanceof Error ? error.message : "Proxy fetch failed";
+    return c.json({ error: message }, 500);
   }
-
-  const contentType = upstream.headers.get("content-type") || "application/octet-stream";
-  const contentLength = upstream.headers.get("content-length");
-  const safeFilename = sanitizeDownloadFilename(filename);
-
-  const headers: Record<string, string> = {
-    "Content-Type": contentType,
-    "Content-Disposition": `attachment; filename="${safeFilename}"`,
-    "Cache-Control": "no-cache",
-  };
-  if (contentLength) headers["Content-Length"] = contentLength;
-
-  return new Response(upstream.body, { status: 200, headers });
 });
 
 function isValidUrl(input: string): boolean {

@@ -54,6 +54,14 @@ const supportedPlatforms = [
   "Vimeo",
 ];
 
+function extractUrl(input: string): string {
+  const trimmed = input.trim();
+  try { new URL(trimmed); return trimmed; } catch {}
+  const match = trimmed.match(/https?:\/\/[^\s\u3000-\u9fff\uff00-\uffef]+/);
+  if (match) return match[0].replace(/[^\w\-._~:/?#[\]@!$&'()*+,;=%]+$/, "");
+  return trimmed;
+}
+
 function DownloadPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -66,14 +74,15 @@ function DownloadPageContent() {
   const [loadingRecent, setLoadingRecent] = useState(false);
 
   const handleParse = async (targetUrl?: string) => {
-    const parseUrl = targetUrl || url;
-    if (!parseUrl.trim()) {
+    const raw = targetUrl || url;
+    if (!raw.trim()) {
       setError("Please enter a video URL");
       setParseState("error");
       return;
     }
+    const parseUrl = extractUrl(raw);
     const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set("url", parseUrl.trim());
+    newParams.set("url", raw.trim());
     router.replace(`/download?${newParams.toString()}`, { scroll: false });
     try {
       setParseState("parsing");
@@ -109,7 +118,8 @@ function DownloadPageContent() {
     const urlParam = searchParams.get("url");
     if (urlParam && !hasAutoParseRef.current) {
       hasAutoParseRef.current = true;
-      setUrl(urlParam);
+      const cleanUrl = extractUrl(urlParam);
+      setUrl(cleanUrl);
       (async () => {
         try {
           setParseState("parsing");
@@ -117,7 +127,7 @@ function DownloadPageContent() {
           const res = await fetch("/api/parse", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: urlParam }),
+            body: JSON.stringify({ url: cleanUrl }),
           });
           const data = await res.json();
           if (!data.success) throw new Error(data.error || "Failed to parse video");
@@ -195,7 +205,7 @@ function DownloadPageContent() {
               )}
             >
               <input
-                type="url"
+                type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => {

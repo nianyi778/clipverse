@@ -28,15 +28,15 @@ const COOKIES_FILE = process.env.COOKIES_FILE || "";
 
 const BASE_ARGS = ["--js-runtimes", "deno", "--no-check-certificates"];
 
-function cookiesArg(path: string): string[] {
+export function cookiesArg(path: string): string[] {
   return path && existsSync(path) ? ["--cookies", path] : [];
 }
 
-function getHostname(url: string): string {
+export function getHostname(url: string): string {
   try { return new URL(url).hostname; } catch { return ""; }
 }
 
-function getPlatformArgs(url: string): string[] {
+export function getPlatformArgs(url: string): string[] {
   const extra: string[] = [];
   const hostname = getHostname(url);
 
@@ -258,7 +258,7 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
   }
 }
 
-function detectPlatform(url: string): string {
+export function detectPlatform(url: string): string {
   const patterns: [string, RegExp[]][] = [
     ["youtube", [/(?:youtube\.com|youtu\.be)/i]],
     ["tiktok", [/tiktok\.com/i]],

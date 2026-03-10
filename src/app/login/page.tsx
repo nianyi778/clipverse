@@ -32,7 +32,10 @@ function LoginPageContent() {
 
   useEffect(() => {
     if (searchParams.get("mode") === "register") setMode("register");
-    if (searchParams.get("error")) setError("Authentication failed. Please try again.");
+    if (searchParams.get("error")) {
+      setError("Authentication failed. Please try again.");
+      setGoogleLoading(false);
+    }
   }, [searchParams]);
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
@@ -77,7 +80,13 @@ function LoginPageContent() {
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    await signIn("google", { callbackUrl: "/download" });
+    setError("");
+    try {
+      await signIn("google", { callbackUrl: "/download" });
+    } catch {
+      setGoogleLoading(false);
+      setError("Google sign-in failed. Please try again.");
+    }
   };
 
   return (

@@ -2,17 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseVideo } from "@/lib/ytdlp-client";
 import type { ParseResponse } from "@/types/video";
 
+function extractUrl(input: string): string {
+  const trimmed = input.trim();
+  try { new URL(trimmed); return trimmed; } catch {}
+  const match = trimmed.match(/https?:\/\/[^\s\u3000-\u9fff\uff00-\uffef]+/);
+  if (match) {
+    return match[0].replace(/[^\w\-._~:/?#[\]@!$&'()*+,;=%]+$/, "");
+  }
+  return trimmed;
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<ParseResponse>> {
   try {
     const body = await request.json();
-    const { url } = body as { url: string };
+    const { url: rawUrl } = body as { url: string };
 
-    if (!url) {
+    if (!rawUrl) {
       return NextResponse.json(
         { success: false, error: "Please provide a valid URL" },
         { status: 400 }
       );
     }
+
+    const url = extractUrl(rawUrl);
 
     const result = await parseVideo(url);
 

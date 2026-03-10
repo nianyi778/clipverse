@@ -225,9 +225,11 @@ export default function Home() {
   const router = useRouter();
 
   const handleDownload = () => {
-    if (url.trim()) {
-      router.push(`/download?url=${encodeURIComponent(url)}`);
-    }
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    const match = trimmed.match(/https?:\/\/[^\s\u3000-\u9fff\uff00-\uffef\u{1F000}-\u{1FFFF}]+/u);
+    const cleanUrl = match ? match[0].replace(/[^\w\-._~:/?#[\]@!$&'()*+,;=%]+$/, "") : trimmed;
+    router.push(`/download?url=${encodeURIComponent(cleanUrl)}`);
   };
 
   return (

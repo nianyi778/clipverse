@@ -250,14 +250,30 @@ app.get("/proxy", async (c) => {
 
   try {
     const parsedUrl = new URL(url);
-    const referer = `${parsedUrl.protocol}//${parsedUrl.hostname}/`;
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    const isDouyinCdn = hostname.includes("douyinvod.com") || hostname.includes("bytevcloudcdn.com") ||
+                        hostname.includes("bytecdn.cn") || hostname.includes("amemv.com");
+    const isXiaohongshuCdn = hostname.includes("xhscdn.com") || hostname.includes("xiaohongshu.com");
+    const isBilibiliCdn = hostname.includes("bilivideo.com") || hostname.includes("biliimg.com");
+
+    let referer: string;
+    if (isDouyinCdn) {
+      referer = "https://www.douyin.com/";
+    } else if (isXiaohongshuCdn) {
+      referer = "https://www.xiaohongshu.com/";
+    } else if (isBilibiliCdn) {
+      referer = "https://www.bilibili.com/";
+    } else {
+      referer = `${parsedUrl.protocol}//${hostname}/`;
+    }
 
     const upstream = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
         "Referer": referer,
         "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
         "Accept-Encoding": "identity",
         "Connection": "keep-alive",
       },

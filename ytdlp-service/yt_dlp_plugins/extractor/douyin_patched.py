@@ -1,3 +1,7 @@
+import random
+import time
+import uuid
+
 from yt_dlp.extractor.tiktok import DouyinIE as _DouyinIE
 from yt_dlp.utils import ExtractorError
 from yt_dlp.utils.traversal import traverse_obj
@@ -57,19 +61,50 @@ def _build_web_params(video_id):
 
 
 def _build_mobile_params(video_id):
+    device_id = str(random.randint(7250000000000000000, 7325099899999994577))
     return {
         "aweme_id": video_id,
         "device_platform": "android",
+        "os": "android",
+        "ssmix": "a",
+        "_rticket": str(int(time.time() * 1000)),
+        "cdid": str(uuid.uuid4()),
+        "channel": "googleplay",
         "aid": "1128",
         "app_name": "aweme",
         "version_code": "290100",
         "version_name": "29.1.0",
+        "manifest_version_code": "290100",
+        "update_version_code": "290100",
+        "ab_version": "29.1.0",
+        "resolution": "1080*2400",
+        "dpi": "420",
         "device_type": "Pixel 6",
         "device_brand": "google",
-        "os_version": "12",
-        "channel": "googleplay",
         "language": "zh",
+        "os_api": "31",
+        "os_version": "12",
+        "ac": "wifi",
+        "is_pad": "0",
+        "current_region": "CN",
+        "app_type": "normal",
+        "sys_region": "CN",
+        "last_install_time": str(int(time.time()) - random.randint(86400, 1123200)),
+        "timezone_name": "Asia/Shanghai",
+        "residence": "CN",
+        "app_language": "zh",
+        "timezone_offset": "28800",
+        "host_abi": "armeabi-v7a",
+        "locale": "zh",
+        "ac2": "wifi5g",
+        "uoo": "1",
+        "carrier_region": "CN",
+        "op_region": "CN",
+        "build_number": "29.1.0",
         "region": "CN",
+        "ts": str(int(time.time())),
+        "device_id": device_id,
+        "openudid": "".join(random.choices("0123456789abcdef", k=16)),
     }
 
 
@@ -94,16 +129,19 @@ def _fetch_web_detail(ie, video_id, params):
 
 
 def _fetch_mobile_detail(ie, video_id, params, api_host):
+    odin_tt = "".join(random.choices("0123456789abcdef", k=160))
+    ie._set_cookie(api_host, "odin_tt", odin_tt)
+
     return traverse_obj(
         ie._download_json(
             f"https://{api_host}/aweme/v1/aweme/detail/",
             video_id,
-            f"Downloading Douyin mobile detail JSON ({api_host})",
-            f"Failed to download from {api_host}",
+            f"Downloading mobile detail ({api_host})",
+            f"Failed ({api_host})",
             query=params,
             headers={
                 "User-Agent": _DOUYIN_APP_UA,
-                "X-SS-REQ-TICKET": "0",
+                "Accept": "application/json",
             },
             fatal=False,
         ),

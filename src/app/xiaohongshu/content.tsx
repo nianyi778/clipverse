@@ -16,7 +16,7 @@ import {
   Send,
   Check,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, extractUrl } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 
 type IconComponent = typeof Download;
@@ -248,7 +248,7 @@ export default function XiaohongshuContent() {
                     e.key === "Enter" &&
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url)}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   placeholder="在此粘贴小红书视频链接..."
@@ -259,7 +259,7 @@ export default function XiaohongshuContent() {
                   onClick={() =>
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url)}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-rose-500 hover:to-pink-500 hover:shadow-[0_0_30px_rgba(244,63,94,0.3)] active:scale-[0.98]"

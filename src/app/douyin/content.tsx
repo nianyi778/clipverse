@@ -16,7 +16,7 @@ import {
   Send,
   Check,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, extractUrl } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 
 type IconComponent = typeof Download;
@@ -248,7 +248,7 @@ export default function DouyinContent() {
                     e.key === "Enter" &&
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url)}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   placeholder="在此粘贴抖音视频链接..."
@@ -259,7 +259,7 @@ export default function DouyinContent() {
                   onClick={() =>
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url)}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-teal-500 hover:to-cyan-500 hover:shadow-[0_0_30px_rgba(20,184,166,0.3)] active:scale-[0.98]"

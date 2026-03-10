@@ -15,7 +15,7 @@ import {
   Send,
   Check,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, extractUrl } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 
 type IconComponent = typeof Download;
@@ -244,7 +244,7 @@ export default function TikTokContent() {
                     e.key === "Enter" &&
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url.trim())}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   placeholder="Paste TikTok video link here..."
@@ -255,7 +255,7 @@ export default function TikTokContent() {
                   onClick={() =>
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url.trim())}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-cyan-500 hover:to-teal-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] active:scale-[0.98]"

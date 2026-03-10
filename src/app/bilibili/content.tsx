@@ -15,7 +15,7 @@ import {
   Send,
   Check,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, extractUrl } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 
 type IconComponent = typeof Download;
@@ -245,7 +245,7 @@ export default function BilibiliContent() {
                     e.key === "Enter" &&
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url.trim())}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   placeholder="Paste Bilibili video link here..."
@@ -256,7 +256,7 @@ export default function BilibiliContent() {
                   onClick={() =>
                     url.trim() &&
                     router.push(
-                      `/download?url=${encodeURIComponent(url.trim())}`
+                      `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
                   className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] active:scale-[0.98]"

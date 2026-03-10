@@ -167,9 +167,16 @@ export function spawnYtdlpStream(url: string, formatId: string, audioFormatId?: 
 }
 
 export async function extractVideoInfo(url: string) {
-  const raw = await runYtdlp(url, ["-j", "--no-download", "--no-warnings"]);
+  const raw = await runYtdlp(url, ["-j", "--no-download", "--no-warnings", "--no-playlist"]);
   const data: YtdlpResult = JSON.parse(raw);
-  return mapToParsedVideo(data, url);
+  if (data._type === "playlist") {
+    throw new Error("Playlist URLs are not supported. Please paste a single video link.");
+  }
+  const result = mapToParsedVideo(data, url);
+  if (result.videoFormats.length === 0 && result.audioFormats.length === 0) {
+    throw new Error("No downloadable video found at this URL. The post may be image-only or the format is not supported.");
+  }
+  return result;
 }
 
 export async function extractSubtitles(url: string) {
@@ -246,6 +253,9 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
     if (stderr.includes("Unsupported URL")) {
       throw new Error("This URL is not supported. Please try a different link.");
     }
+    if (stderr.includes("No video formats found") || stderr.includes("no video formats")) {
+      throw new Error("No video found at this URL. The post may be image-only or the format is not supported.");
+    }
     if (stderr.includes("HTTP Error 429")) {
       throw new Error("Rate limited by the platform. Please try again in a few minutes.");
     }
@@ -259,7 +269,7 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
       throw new Error("yt-dlp is not installed on the server.");
     }
 
-    throw new Error(`Extraction failed: ${stderr.slice(0, 200)}`);
+    throw new Error("Failed to extract video. The URL may be unsupported or the content is unavailable.");
   }
 }
 

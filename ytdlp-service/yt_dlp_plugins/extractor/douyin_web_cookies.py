@@ -20,8 +20,11 @@ def _cookie_from_set_cookie_header(set_cookie_header, name):
     return morsel.value if morsel else None
 
 
+_DOUYIN_HOME = "https://www.douyin.com/"
+
+
 def ensure_douyin_web_cookies(ie, video_id, user_agent):
-    cookies = ie._get_cookies(ie._WEBPAGE_HOST)
+    cookies = ie._get_cookies(_DOUYIN_HOME)
 
     if not cookies.get("ttwid"):
         res = ie._download_webpage_handle(
@@ -34,7 +37,7 @@ def ensure_douyin_web_cookies(ie, video_id, user_agent):
             headers={
                 "User-Agent": user_agent,
                 "Content-Type": "application/json",
-                "Referer": ie._WEBPAGE_HOST,
+                "Referer": _DOUYIN_HOME,
             },
         )
         if res and res is not False:
@@ -45,16 +48,16 @@ def ensure_douyin_web_cookies(ie, video_id, user_agent):
             if ttwid:
                 ie._set_cookie(".douyin.com", "ttwid", ttwid)
 
-    if not ie._get_cookies(ie._WEBPAGE_HOST).get("s_v_web_id"):
+    if not ie._get_cookies(_DOUYIN_HOME).get("s_v_web_id"):
         ie._download_webpage_handle(
-            ie._WEBPAGE_HOST,
+            _DOUYIN_HOME,
             video_id,
             note="Downloading Douyin homepage for cookies",
             errnote="Unable to download Douyin homepage for cookies",
             fatal=False,
             headers={
                 "User-Agent": user_agent,
-                "Referer": ie._WEBPAGE_HOST,
+                "Referer": _DOUYIN_HOME,
             },
             impersonate=True,
         )

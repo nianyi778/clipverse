@@ -80,7 +80,9 @@ class DouyinIE(_DouyinIE):
         if not detail:
             raise ExtractorError(
                 "Fresh cookies (not necessarily logged in) are needed",
-                expected=not self._get_cookies(self._WEBPAGE_HOST).get("s_v_web_id"),
+                expected=not self._get_cookies("https://www.douyin.com/").get(
+                    "s_v_web_id"
+                ),
             )
 
         return self._parse_aweme_video_app(detail)

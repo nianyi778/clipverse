@@ -32,7 +32,8 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --filter ytdlp-service
+        run: pnpm install
+        working-directory: ytdlp-service
 
       - name: Run tests
         run: pnpm test

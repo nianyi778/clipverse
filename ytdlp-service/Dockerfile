@@ -30,11 +30,13 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./
+COPY --from=builder /app/yt_dlp_plugins ./yt_dlp_plugins
 
 ARG BUILD_TIME=unknown
 ARG BUILD_SHA=unknown
 ENV BUILD_TIME=$BUILD_TIME
 ENV BUILD_SHA=$BUILD_SHA
+ENV PYTHONPATH=/app
 ENV PORT=8787
 EXPOSE 8787
 

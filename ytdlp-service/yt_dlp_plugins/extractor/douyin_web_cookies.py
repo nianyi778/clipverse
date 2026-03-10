@@ -1,0 +1,60 @@
+from http.cookies import SimpleCookie
+
+_TTWID_REGISTER_URL = "https://ttwid.bytedance.com/ttwid/union/register/"
+_TTWID_REGISTER_DATA = (
+    '{"region":"cn","aid":1768,"needFid":false,"service":"www.ixigua.com",'
+    '"migrate_info":{"ticket":"","source":"node"},"cbUrlProtocol":"https",'
+    '"union":true}'
+).encode()
+
+
+def _cookie_from_set_cookie_header(set_cookie_header, name):
+    if not set_cookie_header:
+        return None
+    cookie_jar = SimpleCookie()
+    try:
+        cookie_jar.load(set_cookie_header)
+    except Exception:
+        return None
+    morsel = cookie_jar.get(name)
+    return morsel.value if morsel else None
+
+
+def ensure_douyin_web_cookies(ie, video_id, user_agent):
+    cookies = ie._get_cookies(ie._WEBPAGE_HOST)
+
+    if not cookies.get("ttwid"):
+        res = ie._download_webpage_handle(
+            _TTWID_REGISTER_URL,
+            video_id,
+            note="Downloading ttwid cookie",
+            errnote="Unable to download ttwid cookie",
+            fatal=False,
+            data=_TTWID_REGISTER_DATA,
+            headers={
+                "User-Agent": user_agent,
+                "Content-Type": "application/json",
+                "Referer": ie._WEBPAGE_HOST,
+            },
+        )
+        if res and res is not False:
+            _, urlh = res
+            ttwid = _cookie_from_set_cookie_header(
+                urlh.headers.get("Set-Cookie"), "ttwid"
+            )
+            if ttwid:
+                ie._set_cookie(".douyin.com", "ttwid", ttwid)
+
+    if not ie._get_cookies(ie._WEBPAGE_HOST).get("s_v_web_id"):
+        ie._download_webpage_handle(
+            ie._WEBPAGE_HOST,
+            video_id,
+            note="Downloading Douyin homepage for cookies",
+            errnote="Unable to download Douyin homepage for cookies",
+            fatal=False,
+            headers={
+                "User-Agent": user_agent,
+                "Referer": ie._WEBPAGE_HOST,
+            },
+            impersonate=True,
+        )

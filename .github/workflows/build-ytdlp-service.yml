@@ -22,16 +22,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ytdlp-service
+        run: pnpm install --filter ytdlp-service
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
         working-directory: ytdlp-service
 
       - uses: docker/setup-buildx-action@v3

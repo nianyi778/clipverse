@@ -77,24 +77,40 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="/" className="flex items-center gap-2.5 select-none group">
           <svg
-            viewBox="0 0 32 32"
-            className="size-8 shrink-0 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]"
+            viewBox="0 0 36 36"
+            className="size-9 shrink-0"
             role="img"
             aria-hidden="true"
+            style={{ filter: "drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4))" }}
           >
             <defs>
-              <linearGradient id="cv-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#7c3aed" />
-                <stop offset="100%" stopColor="#a855f7" />
+              <linearGradient id="cv-bg-main" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="50%" stopColor="#7c3aed" />
+                <stop offset="100%" stopColor="#6d28d9" />
               </linearGradient>
-              <linearGradient id="cv-play" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
-                <stop offset="100%" stopColor="#e9d5ff" stopOpacity="0.9" />
+              <linearGradient id="cv-bg-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#fff" stopOpacity="0.25" />
+                <stop offset="50%" stopColor="#fff" stopOpacity="0.05" />
+                <stop offset="100%" stopColor="#fff" stopOpacity="0" />
               </linearGradient>
+              <linearGradient id="cv-play-face" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" />
+                <stop offset="100%" stopColor="#e9d5ff" />
+              </linearGradient>
+              <filter id="cv-inner-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur" />
+                <feOffset dx="0" dy="1" result="offsetBlur" />
+                <feComposite in="SourceGraphic" in2="offsetBlur" operator="over" />
+              </filter>
             </defs>
-            <rect width="32" height="32" rx="8" fill="url(#cv-bg)" />
-            <path d="M13 10l10 6-10 6V10z" fill="url(#cv-play)" />
-            <rect x="21" y="18" width="2.5" height="6" rx="1.25" fill="#fff" opacity="0.7" />
+            <rect x="2" y="2" width="32" height="32" rx="8" fill="#4c1d95" />
+            <rect x="1" y="1" width="32" height="32" rx="8" fill="url(#cv-bg-main)" />
+            <rect x="1" y="1" width="32" height="16" rx="8" fill="url(#cv-bg-shine)" />
+            <g filter="url(#cv-inner-shadow)">
+              <path d="M14 11.5L24 18L14 24.5V11.5Z" fill="url(#cv-play-face)" />
+            </g>
+            <path d="M14 11.5L14 24.5L24 18L14 11.5Z" fill="#fff" fillOpacity="0.15" style={{ transform: "translateX(-1px)" }} />
           </svg>
           <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-violet-400 to-purple-500 bg-clip-text text-transparent transition-all duration-300 group-hover:from-violet-300 group-hover:to-purple-400">
             ClipVerse

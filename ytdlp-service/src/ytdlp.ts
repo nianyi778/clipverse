@@ -26,7 +26,7 @@ const DOUYIN_COOKIES = process.env.DOUYIN_COOKIES_FILE || `${COOKIES_DIR}/douyin
 const XIAOHONGSHU_COOKIES = process.env.XIAOHONGSHU_COOKIES_FILE || `${COOKIES_DIR}/xiaohongshu.txt`;
 const COOKIES_FILE = process.env.COOKIES_FILE || "";
 
-const BASE_ARGS = ["--js-runtimes", "deno", "--no-check-certificates"];
+const BASE_ARGS = ["--js-runtimes", "node,deno", "--no-check-certificates"];
 
 export function cookiesArg(path: string): string[] {
   return path && existsSync(path) ? ["--cookies", path] : [];
@@ -93,6 +93,7 @@ export function getPlatformArgs(url: string): string[] {
     if (XIAOHONGSHU_PROXY) extra.push("--proxy", XIAOHONGSHU_PROXY);
     extra.push(...cookiesArg(XIAOHONGSHU_COOKIES));
     extra.push("--impersonate", "chrome-124");
+    extra.push("--add-headers", "Referer:https://www.xiaohongshu.com");
   }
 
   if (COOKIES_FILE && !extra.includes("--cookies")) {
@@ -231,10 +232,14 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
       stderr.includes("login required") ||
       stderr.includes("Login required") ||
       stderr.includes("not logged in") ||
-      stderr.includes("cookies") ||
+      stderr.includes("cookies are needed") ||
+      stderr.includes("cookies required") ||
+      stderr.includes("Cookies are required") ||
       stderr.includes("This content is only available to logged-in users") ||
       stderr.includes("Please log in") ||
-      stderr.includes("You need to log in")
+      stderr.includes("You need to log in") ||
+      stderr.includes("Fresh cookies") ||
+      stderr.includes("Sign in to")
     ) {
       throw new Error("This video requires login. Please try a different video.");
     }

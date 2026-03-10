@@ -1,0 +1,279 @@
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { Readable } from "node:stream";
+import { writeFileSync, mkdirSync, statSync, existsSync } from "node:fs";
+
+import { expandCookieDomains } from "./utils.js";
+import { extractVideoInfo, extractSubtitles, getDownloadUrl, getMergedDownloadUrl, spawnYtdlpStream } from "./ytdlp.js";
+
+export const getCookiesDir = () => process.env.COOKIES_DIR || "/cookies";
+
+export const app = new Hono();
+export const API_KEY = process.env.YTDLP_API_KEY || "";
+
+app.use("*", cors());
+
+app.use("*", async (c, next) => {
+  if (c.req.path === "/health" || c.req.path === "/proxy" || c.req.path === "/stream") return next();
+  if (API_KEY) {
+    const key = c.req.header("x-api-key");
+    if (key !== API_KEY) return c.json({ success: false, error: "Unauthorized" }, 401);
+  }
+  return next();
+});
+
+app.get("/health", (c) => c.json({
+  ok: true,
+  ts: Date.now(),
+  version: process.env.npm_package_version || "0.1.0",
+  buildTime: process.env.BUILD_TIME || "unknown",
+  buildSha: (process.env.BUILD_SHA || "unknown").slice(0, 7),
+}));
+
+const VALID_PLATFORMS = ["youtube", "tiktok", "bilibili", "instagram", "twitter", "facebook", "douyin", "xiaohongshu"];
+
+const PLATFORM_TEST_URLS: Record<string, string> = {
+  youtube:      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  tiktok:       "https://www.tiktok.com/@tiktok/video/7106594312292453675",
+  instagram:    "https://www.instagram.com/p/CUbXQ3_rWYP/",
+  twitter:      "https://x.com/Twitter/status/1445078208190291973",
+  facebook:     "https://www.facebook.com/watch/?v=10153231379946729",
+  bilibili:     "https://www.bilibili.com/video/BV1GJ411x7h7",
+  douyin:       "https://www.douyin.com/video/7153585060275425572",
+  xiaohongshu:  "https://www.xiaohongshu.com/explore/6366983f000000001f019f40",
+};
+
+app.get("/admin/cookies", (c) => {
+  const cookiesDir = getCookiesDir();
+  const status = VALID_PLATFORMS.map((platform) => {
+    const path = `${cookiesDir}/${platform}.txt`;
+    if (!existsSync(path)) return { platform, exists: false };
+    const stat = statSync(path);
+    return {
+      platform,
+      exists: true,
+      bytes: stat.size,
+      updatedAt: stat.mtime.toISOString(),
+    };
+  });
+  return c.json({ success: true, cookies: status });
+});
+
+app.post("/admin/cookies/validate", async (c) => {
+  const body = await c.req.json<{ platform?: string }>().catch(() => ({}));
+  const targets = body.platform ? [body.platform] : VALID_PLATFORMS;
+  const cookiesDir = getCookiesDir();
+
+  const results = await Promise.all(
+    targets.map(async (platform) => {
+      const path = `${cookiesDir}/${platform}.txt`;
+      if (!existsSync(path)) return { platform, exists: false, valid: false, error: "No cookies file" };
+
+      const testUrl = PLATFORM_TEST_URLS[platform];
+      if (!testUrl) return { platform, exists: true, valid: null, error: "No test URL configured" };
+
+      try {
+        await extractVideoInfo(testUrl);
+        return { platform, exists: true, valid: true };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        const expired = msg.includes("login") || msg.includes("Login") || msg.includes("cookies") || msg.includes("sign in");
+        return { platform, exists: true, valid: false, expired, error: msg.slice(0, 120) };
+      }
+    })
+  );
+
+  return c.json({ success: true, results });
+});
+
+app.post("/admin/cookies", async (c) => {
+  if (API_KEY) {
+    const key = c.req.header("x-api-key");
+    if (key !== API_KEY) return c.json({ success: false, error: "Unauthorized" }, 401);
+  }
+
+  try {
+    const { platform, content } = await c.req.json<{ platform: string; content: string }>();
+    if (!platform || !VALID_PLATFORMS.includes(platform)) {
+      return c.json({ success: false, error: `Invalid platform. Use: ${VALID_PLATFORMS.join(", ")}` }, 400);
+    }
+    if (!content || typeof content !== "string") {
+      return c.json({ success: false, error: "content (cookies.txt text) is required" }, 400);
+    }
+    const cookiesDir = getCookiesDir();
+    mkdirSync(cookiesDir, { recursive: true });
+    const filePath = `${cookiesDir}/${platform}.txt`;
+    const DOMAIN_EXPANSIONS: Record<string, Record<string, string>> = {
+      douyin: { "douyin.com": "iesdouyin.com" },
+    };
+    const expanded = DOMAIN_EXPANSIONS[platform]
+      ? expandCookieDomains(content, DOMAIN_EXPANSIONS[platform])
+      : content;
+    writeFileSync(filePath, expanded, "utf-8");
+    return c.json({ success: true, path: filePath, bytes: expanded.length });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to save cookies";
+    return c.json({ success: false, error: message }, 500);
+  }
+});
+
+app.post("/parse", async (c) => {
+  try {
+    const { url } = await c.req.json<{ url: string }>();
+    if (!url || !isValidUrl(url)) {
+      return c.json({ success: false, error: "Please provide a valid URL" }, 400);
+    }
+    const data = await extractVideoInfo(url);
+    return c.json({ success: true, data });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to parse video";
+    return c.json({ success: false, error: message }, 500);
+  }
+});
+
+app.post("/download", async (c) => {
+  try {
+    const { url, formatId, type, audioFormatId } = await c.req.json<{
+      url: string;
+      formatId: string;
+      type: "video" | "audio" | "subtitle";
+      audioFormatId?: string;
+    }>();
+
+    if (!url || !formatId || !isValidUrl(url)) {
+      return c.json({ success: false, error: "Missing required parameters" }, 400);
+    }
+
+    let result: { streamUrl: string; filename: string };
+
+    if (type === "video" && audioFormatId) {
+      result = await getMergedDownloadUrl(url, formatId, audioFormatId);
+    } else {
+      result = await getDownloadUrl(url, formatId);
+    }
+
+    if (!result.streamUrl) {
+      return c.json({ success: false, error: "Could not retrieve download URL" }, 500);
+    }
+
+    return c.json({ success: true, downloadUrl: result.streamUrl, filename: result.filename });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Download failed";
+    return c.json({ success: false, error: message }, 500);
+  }
+});
+
+app.post("/subtitles", async (c) => {
+  try {
+    const { url } = await c.req.json<{ url: string }>();
+    if (!url || !isValidUrl(url)) {
+      return c.json({ success: false, error: "Please provide a valid URL" }, 400);
+    }
+    const { manual, auto } = await extractSubtitles(url);
+    return c.json({ success: true, subtitles: manual, autoSubtitles: auto });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Subtitle extraction failed";
+    return c.json({ success: false, error: message }, 500);
+  }
+});
+
+app.post("/batch", async (c) => {
+  try {
+    const { urls } = await c.req.json<{ urls: string[] }>();
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return c.json({ success: false, error: "Please provide at least one URL" }, 400);
+    }
+    if (urls.length > 10) {
+      return c.json({ success: false, error: "Maximum 10 URLs per batch" }, 400);
+    }
+
+    const invalid = urls.filter((u) => !isValidUrl(u));
+    if (invalid.length > 0) {
+      return c.json({ success: false, error: `Invalid URLs: ${invalid.join(", ")}` }, 400);
+    }
+
+    const items = await Promise.all(
+      urls.map(async (url, index) => {
+        const id = `batch-${Date.now()}-${index}`;
+        try {
+          const parsed = await extractVideoInfo(url);
+          return {
+            id, url, status: "completed" as const,
+            title: parsed.title, thumbnail: parsed.thumbnail,
+            duration: parsed.duration, formats: parsed.videoFormats.length,
+          };
+        } catch (error) {
+          return {
+            id, url, status: "failed" as const,
+            error: error instanceof Error ? error.message : "Extraction failed",
+          };
+        }
+      })
+    );
+
+    return c.json({ success: true, items });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Batch processing failed";
+    return c.json({ success: false, error: message }, 500);
+  }
+});
+
+app.get("/stream", async (c) => {
+  const url = c.req.query("url");
+  const formatId = c.req.query("formatId");
+  const audioFormatId = c.req.query("audioFormatId") || undefined;
+  const filename = c.req.query("filename") || "download.mp4";
+
+  if (!url || !formatId) return c.json({ error: "Missing url or formatId" }, 400);
+
+  const child = spawnYtdlpStream(url, formatId, audioFormatId);
+  if (!child.stdout) return c.json({ error: "Failed to start stream" }, 500);
+
+  const safeFilename = filename.replace(/[^\w\s\-_.()]/g, "_");
+  const webStream = Readable.toWeb(child.stdout) as ReadableStream;
+
+  return new Response(webStream, {
+    headers: {
+      "Content-Type": "application/octet-stream",
+      "Content-Disposition": `attachment; filename="${safeFilename}"`,
+      "Cache-Control": "no-cache",
+    },
+  });
+});
+
+app.get("/proxy", async (c) => {
+  const url = c.req.query("url");
+  const filename = c.req.query("filename") || "download.mp4";
+
+  if (!url) return c.json({ error: "Missing url parameter" }, 400);
+
+  const upstream = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+  });
+
+  if (!upstream.ok || !upstream.body) {
+    return c.json({ error: `Upstream returned ${upstream.status}` }, 502);
+  }
+
+  const contentType = upstream.headers.get("content-type") || "application/octet-stream";
+  const contentLength = upstream.headers.get("content-length");
+  const safeFilename = filename.replace(/[^\w\s\-_.()]/g, "_");
+
+  const headers: Record<string, string> = {
+    "Content-Type": contentType,
+    "Content-Disposition": `attachment; filename="${safeFilename}"`,
+    "Cache-Control": "no-cache",
+  };
+  if (contentLength) headers["Content-Length"] = contentLength;
+
+  return new Response(upstream.body, { status: 200, headers });
+});
+
+function isValidUrl(input: string): boolean {
+  try {
+    const url = new URL(input);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}

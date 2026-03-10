@@ -228,7 +228,6 @@ async function runYtdlp(url: string, args: string[]): Promise<string> {
   } catch (error: unknown) {
     const err = error as { stderr?: string; code?: number; message?: string };
     const stderr = err.stderr || err.message || "Unknown yt-dlp error";
-    console.error("[ytdlp debug] code:", err.code, "| stderr:", JSON.stringify((err.stderr || "").slice(0, 300)), "| msg:", JSON.stringify((err.message || "").slice(0, 300)));
 
     if (stderr.includes("Video unavailable") || stderr.includes("Private video")) {
       throw new Error("This video is unavailable or private");

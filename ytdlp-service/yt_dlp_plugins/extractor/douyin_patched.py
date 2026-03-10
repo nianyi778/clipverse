@@ -133,7 +133,8 @@ class DouyinIE(_DouyinIE):
 
         if not detail:
             raise ExtractorError(
-                "Unable to download video. The video may be geo-restricted, private, or deleted.",
+                "Unable to download Douyin video. Douyin is geo-restricted to China. "
+                "If you are outside China, you may need a China proxy to access this content.",
                 expected=True,
             )
 

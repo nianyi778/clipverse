@@ -8,7 +8,7 @@ from .douyin_web_cookies import ensure_douyin_web_cookies
 _DOUYIN_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/130.0.0.0 Safari/537.36"
+    "Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
 )
 
 
@@ -46,7 +46,7 @@ def _build_douyin_params(video_id):
 
 def _fetch_aweme_detail(ie, video_id, params):
     signed_params = dict(params)
-    signed_params["a_bogus"] = generate_abogus(dict(params))
+    signed_params["a_bogus"] = generate_abogus(dict(params), user_agent=_DOUYIN_UA)
     return traverse_obj(
         ie._download_json(
             "https://www.douyin.com/aweme/v1/web/aweme/detail/",

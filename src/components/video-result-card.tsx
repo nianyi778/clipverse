@@ -101,15 +101,10 @@ export function VideoResultCard({ video }: { video: ParsedVideo }) {
       const proxyBase = process.env.NEXT_PUBLIC_YTDLP_PROXY_URL || "http://localhost:8787";
       const filename = data.filename || `${video.title || "download"}.mp4`;
       
-      // Use /proxy with direct CDN URL for platforms that need signing (Douyin, etc.)
-      // Fall back to /stream for platforms that work with re-fetching
-      if (data.downloadUrl) {
-        const params = new URLSearchParams({
-          url: data.downloadUrl,
-          filename,
-        });
-        window.location.href = `${proxyBase}/proxy?${params.toString()}`;
-      } else {
+      const isHlsStream = data.downloadUrl?.includes(".m3u8");
+      const needsYtdlp = !data.downloadUrl || isHlsStream;
+      
+      if (needsYtdlp) {
         const params = new URLSearchParams({
           url: video.url,
           formatId,
@@ -117,6 +112,12 @@ export function VideoResultCard({ video }: { video: ParsedVideo }) {
         });
         if (body.audioFormatId) params.set("audioFormatId", body.audioFormatId);
         window.location.href = `${proxyBase}/stream?${params.toString()}`;
+      } else {
+        const params = new URLSearchParams({
+          url: data.downloadUrl,
+          filename,
+        });
+        window.location.href = `${proxyBase}/proxy?${params.toString()}`;
       }
     } catch (err) {
       setDownloadError(err instanceof Error ? err.message : "Download failed");

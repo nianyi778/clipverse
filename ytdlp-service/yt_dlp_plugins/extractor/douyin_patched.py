@@ -5,14 +5,26 @@ from yt_dlp.utils.traversal import traverse_obj
 from .douyin_signatures import generate_abogus
 from .douyin_web_cookies import ensure_douyin_web_cookies
 
-_DOUYIN_UA = (
+_DOUYIN_WEB_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
+    "Chrome/131.0.0.0 Safari/537.36"
 )
 
+_DOUYIN_APP_UA = (
+    "com.ss.android.ugc.aweme/290100 "
+    "(Linux; U; Android 12; zh_CN; Pixel 6; Build/SQ1A.220105.002; "
+    "Cronet/TTNetVersion:b87d87a1 2024-08-23 QuicVersion:47946d2a 2020-10-14)"
+)
 
-def _build_douyin_params(video_id):
+_MOBILE_API_HOSTS = [
+    "api3-normal-c-lq.amemv.com",
+    "api5-normal-c-lq.amemv.com",
+    "api3-normal-c-hl.amemv.com",
+]
+
+
+def _build_web_params(video_id):
     return {
         "device_platform": "webapp",
         "aid": "6383",
@@ -26,10 +38,10 @@ def _build_douyin_params(video_id):
         "browser_language": "zh-CN",
         "browser_platform": "Win32",
         "browser_name": "Chrome",
-        "browser_version": "130.0.0.0",
+        "browser_version": "131.0.0.0",
         "browser_online": "true",
         "engine_name": "Blink",
-        "engine_version": "130.0.0.0",
+        "engine_version": "131.0.0.0",
         "os_name": "Windows",
         "os_version": "10",
         "cpu_core_num": "12",
@@ -44,9 +56,26 @@ def _build_douyin_params(video_id):
     }
 
 
-def _fetch_aweme_detail(ie, video_id, params):
+def _build_mobile_params(video_id):
+    return {
+        "aweme_id": video_id,
+        "device_platform": "android",
+        "aid": "1128",
+        "app_name": "aweme",
+        "version_code": "290100",
+        "version_name": "29.1.0",
+        "device_type": "Pixel 6",
+        "device_brand": "google",
+        "os_version": "12",
+        "channel": "googleplay",
+        "language": "zh",
+        "region": "CN",
+    }
+
+
+def _fetch_web_detail(ie, video_id, params):
     signed_params = dict(params)
-    signed_params["a_bogus"] = generate_abogus(dict(params), user_agent=_DOUYIN_UA)
+    signed_params["a_bogus"] = generate_abogus(dict(params), user_agent=_DOUYIN_WEB_UA)
     return traverse_obj(
         ie._download_json(
             "https://www.douyin.com/aweme/v1/web/aweme/detail/",
@@ -55,8 +84,26 @@ def _fetch_aweme_detail(ie, video_id, params):
             "Failed to download Douyin web detail JSON",
             query=signed_params,
             headers={
-                "User-Agent": _DOUYIN_UA,
+                "User-Agent": _DOUYIN_WEB_UA,
                 "Referer": "https://www.douyin.com/",
+            },
+            fatal=False,
+        ),
+        ("aweme_detail", {dict}),
+    )
+
+
+def _fetch_mobile_detail(ie, video_id, params, api_host):
+    return traverse_obj(
+        ie._download_json(
+            f"https://{api_host}/aweme/v1/aweme/detail/",
+            video_id,
+            f"Downloading Douyin mobile detail JSON ({api_host})",
+            f"Failed to download from {api_host}",
+            query=params,
+            headers={
+                "User-Agent": _DOUYIN_APP_UA,
+                "X-SS-REQ-TICKET": "0",
             },
             fatal=False,
         ),
@@ -69,20 +116,25 @@ class DouyinIE(_DouyinIE):
 
     def _real_extract(self, url):
         video_id = self._match_id(url)
-        params = _build_douyin_params(video_id)
 
-        detail = _fetch_aweme_detail(self, video_id, params)
+        for api_host in _MOBILE_API_HOSTS:
+            mobile_params = _build_mobile_params(video_id)
+            detail = _fetch_mobile_detail(self, video_id, mobile_params, api_host)
+            if detail:
+                self.to_screen(f"Got video via mobile API ({api_host})")
+                return self._parse_aweme_video_app(detail)
+
+        web_params = _build_web_params(video_id)
+        detail = _fetch_web_detail(self, video_id, web_params)
 
         if not detail:
-            ensure_douyin_web_cookies(self, video_id, _DOUYIN_UA)
-            detail = _fetch_aweme_detail(self, video_id, params)
+            ensure_douyin_web_cookies(self, video_id, _DOUYIN_WEB_UA)
+            detail = _fetch_web_detail(self, video_id, web_params)
 
         if not detail:
             raise ExtractorError(
-                "Fresh cookies (not necessarily logged in) are needed",
-                expected=not self._get_cookies("https://www.douyin.com/").get(
-                    "s_v_web_id"
-                ),
+                "Unable to download video. The video may be geo-restricted, private, or deleted.",
+                expected=True,
             )
 
         return self._parse_aweme_video_app(detail)

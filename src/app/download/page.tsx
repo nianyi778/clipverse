@@ -8,6 +8,7 @@ import { Search, Loader2, AlertCircle, RotateCcw, Clock, CheckCircle, XCircle, E
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 import { VideoResultCard } from "@/components/video-result-card";
+import { useI18n } from "@/lib/i18n";
 import type { ParsedVideo, ParseState } from "@/types/video";
 
 interface DownloadRecord {
@@ -63,6 +64,7 @@ function extractUrl(input: string): string {
 }
 
 function DownloadPageContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { status: authStatus } = useSession();
@@ -177,10 +179,10 @@ function DownloadPageContent() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="mb-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Download Video
+            {t("download.title")}
           </h1>
           <p className="text-base text-white/40">
-            Paste a video URL to analyze and download in your preferred quality
+            {t("download.subtitle")}
           </p>
         </motion.div>
 
@@ -216,7 +218,7 @@ function DownloadPageContent() {
                     handleParse();
                   }
                 }}
-                placeholder="Paste video URL here..."
+                placeholder={t("download.placeholder")}
                 disabled={parseState === "parsing"}
                 className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/25 disabled:opacity-50 md:text-base"
               />
@@ -234,12 +236,12 @@ function DownloadPageContent() {
                 {parseState === "parsing" ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    <span className="hidden sm:inline">Parsing...</span>
+                    <span className="hidden sm:inline">{t("download.parsing")}</span>
                   </>
                 ) : (
                   <>
                     <Search className="size-4" />
-                    <span className="hidden sm:inline">Parse</span>
+                    <span className="hidden sm:inline">{t("download.parse")}</span>
                   </>
                 )}
               </button>
@@ -307,7 +309,7 @@ function DownloadPageContent() {
                 className="flex cursor-pointer items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/60"
               >
                 <RotateCcw className="size-3" />
-                Try again
+                {t("download.tryAgain")}
               </button>
             </motion.div>
           )}
@@ -328,7 +330,7 @@ function DownloadPageContent() {
                   onClick={handleReset}
                   className="cursor-pointer text-xs text-white/25 transition-colors hover:text-white/45"
                 >
-                  Parse another URL
+                  {t("download.parseAnother")}
                 </button>
               </div>
             </motion.div>
@@ -340,7 +342,7 @@ function DownloadPageContent() {
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="size-4 text-white/25" />
-                <h2 className="text-sm font-semibold text-white/50">Recent Downloads</h2>
+                <h2 className="text-sm font-semibold text-white/50">{t("download.recent")}</h2>
               </div>
               <a href="/dashboard" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
                 View all →
@@ -354,7 +356,7 @@ function DownloadPageContent() {
             ) : recentDownloads.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.06] py-12">
                 <p className="text-sm text-white/20">
-                  No downloads yet. Paste a video URL above to get started.
+                  {t("download.noDownloads")}
                 </p>
               </div>
             ) : (

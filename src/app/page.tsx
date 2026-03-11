@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
+import { useI18n } from "@/lib/i18n";
 
 type IconComponent = typeof Download;
 
@@ -63,27 +64,23 @@ const platforms = [
 const features: Feature[] = [
   {
     icon: MonitorPlay,
-    title: "4K Ultra HD",
-    description:
-      "YouTube 4K, Bilibili 4K+VIP, multiple codecs (AV1 / VP9 / H.264). Crystal-clear downloads at the highest quality available.",
+    title: "features.4k.title",
+    description: "features.4k.desc",
   },
   {
     icon: Layers,
-    title: "Batch Download",
-    description:
-      "Download up to 10 videos at once. Full playlist support with queue management and automatic retry on failures.",
+    title: "features.batch.title",
+    description: "features.batch.desc",
   },
   {
     icon: Chrome,
-    title: "Chrome Extension",
-    description:
-      "One-click download button on any video page. Detects video quality automatically. Works on 50+ supported sites.",
+    title: "features.extension.title",
+    description: "features.extension.desc",
   },
   {
     icon: Subtitles,
-    title: "AI Subtitles",
-    description:
-      "Auto-extract subtitles with AI-powered translation in 50+ languages. SRT, VTT, and TXT formats supported.",
+    title: "features.subtitles.title",
+    description: "features.subtitles.desc",
   },
 ];
 
@@ -221,6 +218,7 @@ function PlatformMarqueeRow({ prefix }: { prefix: string }) {
 }
 
 export default function Home() {
+  const { t } = useI18n();
   const [url, setUrl] = useState("");
   const router = useRouter();
 
@@ -269,11 +267,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mb-6 text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            Download Videos from{" "}
-            <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-              Any Platform
-            </span>
-            , Instantly
+            {t("home.title")}
           </motion.h1>
 
           <motion.p
@@ -281,8 +275,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-white/45 md:text-xl"
           >
-            Paste a link. Pick quality. Download.{" "}
-            <span className="text-white/65">No software needed.</span>
+            {t("home.subtitle")}
           </motion.p>
 
           <motion.div
@@ -300,7 +293,7 @@ export default function Home() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleDownload();
                   }}
-                  placeholder="Paste video link here... (YouTube, TikTok, Instagram...)"
+                  placeholder={t("home.input")}
                   className="min-w-0 flex-1 bg-transparent px-4 py-3 text-base text-white outline-none placeholder:text-white/25"
                 />
                 <button
@@ -309,7 +302,7 @@ export default function Home() {
                   className="flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_30px_rgba(124,58,237,0.35)] active:scale-[0.98]"
                 >
                   <Download className="size-4" />
-                  <span className="hidden sm:inline">Download</span>
+                  <span className="hidden sm:inline">{t("home.download")}</span>
                 </button>
               </div>
             </div>
@@ -320,7 +313,7 @@ export default function Home() {
             transition={{ duration: 0.4, delay: 0.4 }}
             className="text-sm text-white/25"
           >
-            Try it free — 5 downloads/day, 1080p quality
+            {t("home.cta")}
           </motion.p>
         </motion.div>
       </section>
@@ -357,7 +350,7 @@ export default function Home() {
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
             >
-              Why ClipVerse?
+              {t("features.title")}
             </motion.h2>
           </motion.div>
 
@@ -378,10 +371,10 @@ export default function Home() {
                       <Icon className="size-6 text-violet-400" />
                     </div>
                     <h3 className="mb-2 text-lg font-semibold text-white/90">
-                      {feature.title}
+                      {t(feature.title as any)}
                     </h3>
                     <p className="text-sm leading-relaxed text-white/40">
-                      {feature.description}
+                      {t(feature.description as any)}
                     </p>
                   </div>
                 </motion.div>
@@ -411,7 +404,7 @@ export default function Home() {
               variants={fadeInUp}
               className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
             >
-              Simple, Transparent Pricing
+              {t("pricing.title")}
             </motion.h2>
             <motion.p
               variants={fadeInUp}

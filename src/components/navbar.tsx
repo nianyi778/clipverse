@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Globe, ArrowRight, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, Globe, ArrowRight, LogOut, LayoutDashboard, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n, type Locale } from "@/lib/i18n";
 
 interface NavLink {
   label: string;
@@ -12,32 +13,31 @@ interface NavLink {
   hasDropdown?: boolean;
 }
 
-const navLinks: NavLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Download", href: "/download" },
-  { label: "Tools", href: "/youtube", hasDropdown: true },
-  { label: "Pricing", href: "/pricing" },
-];
-
-const toolsDropdown = [
-  { label: "YouTube Downloader", href: "/youtube" },
-  { label: "TikTok No Watermark", href: "/tiktok" },
-  { label: "Instagram Reels", href: "/instagram" },
-  { label: "Twitter / X Video", href: "/twitter" },
-  { label: "Facebook Video", href: "/facebook" },
-  { label: "Bilibili Downloader", href: "/bilibili" },
-  { label: "抖音下载器", href: "/douyin" },
-  { label: "小红书下载器", href: "/xiaohongshu" },
+const languages = [
+  { code: "en" as Locale, label: "English", flag: "EN" },
+  { code: "zh-CN" as Locale, label: "简体中文", flag: "中" },
+  { code: "ja" as Locale, label: "日本語", flag: "日" },
+  { code: "ko" as Locale, label: "한국어", flag: "한" },
 ];
 
 export function Navbar() {
+  const { t, locale, setLocale } = useI18n();
   const { data: session, status } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  const navLinks: NavLink[] = [
+    { label: t("nav.home"), href: "/" },
+    { label: t("nav.download"), href: "/download" },
+    { label: t("nav.tools"), href: "/youtube", hasDropdown: true },
+    { label: t("nav.pricing"), href: "/pricing" },
+  ];
 
   const isAuthed = status === "authenticated" && !!session?.user;
 
@@ -58,10 +58,24 @@ export function Navbar() {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const toolsDropdown = [
+    { label: "YouTube Downloader", href: "/youtube" },
+    { label: "TikTok No Watermark", href: "/tiktok" },
+    { label: "Instagram Reels", href: "/instagram" },
+    { label: "Twitter / X Video", href: "/twitter" },
+    { label: "Facebook Video", href: "/facebook" },
+    { label: "Bilibili Downloader", href: "/bilibili" },
+    { label: "抖音下载器", href: "/douyin" },
+    { label: "小红书下载器", href: "/xiaohongshu" },
+  ];
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
@@ -170,13 +184,46 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <button
-            type="button"
-            className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white/50 transition-colors hover:text-white/80"
-          >
-            <Globe className="size-3.5" />
-            EN
-          </button>
+          <div ref={langMenuRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setLangMenuOpen((p) => !p)}
+              className="flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-white/50 transition-colors hover:text-white/80"
+            >
+              <Globe className="size-3.5" />
+              {languages.find((l) => l.code === locale)?.flag || "EN"}
+              <ChevronDown className={cn("size-3 transition-transform", langMenuOpen && "rotate-180")} />
+            </button>
+            <AnimatePresence>
+              {langMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-36 rounded-xl border border-white/[0.08] bg-black/90 p-1.5 shadow-2xl backdrop-blur-2xl"
+                >
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => {
+                        setLocale(lang.code);
+                        setLangMenuOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/[0.06]",
+                        locale === lang.code ? "text-violet-400" : "text-white/60"
+                      )}
+                    >
+                      {lang.label}
+                      {locale === lang.code && <Check className="size-3" />}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           {isAuthed ? (
             <div ref={userMenuRef} className="relative">
               <button
@@ -239,13 +286,13 @@ export function Navbar() {
                 href="/login"
                 className="rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:text-white"
               >
-                Log in
+                {t("nav.login")}
               </a>
               <a
                 href="/register"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_24px_rgba(124,58,237,0.3)]"
               >
-                Get Started
+                {t("nav.register")}
                 <ArrowRight className="size-3.5" />
               </a>
             </>
@@ -336,15 +383,17 @@ export function Navbar() {
                   <>
                     <a
                       href="/login"
+                      onClick={closeMobile}
                       className="px-3 py-2.5 text-white/50 transition-colors hover:text-white"
                     >
-                      Log in
+                      {t("nav.login")}
                     </a>
                     <a
                       href="/register"
+                      onClick={closeMobile}
                       className="rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-center text-sm font-medium text-white"
                     >
-                      Get Started Free
+                      {t("nav.register")}
                     </a>
                   </>
                 )}

@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ParsedVideo, Platform } from "@/types/video";
 import { QualitySelector } from "./quality-selector";
+import { useI18n } from "@/lib/i18n";
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -56,6 +57,7 @@ const tabs: { id: TabId; label: string; icon: typeof MonitorPlay }[] = [
 ];
 
 export function VideoResultCard({ video }: { video: ParsedVideo }) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<TabId>("video");
   const [selectedVideoId, setSelectedVideoId] = useState<string | undefined>(
     video.videoFormats[0]?.formatId
@@ -339,7 +341,7 @@ export function VideoResultCard({ video }: { video: ParsedVideo }) {
                         ) : (
                           <Download className="size-3" />
                         )}
-                        Download
+                        {t("video.download")}
                       </button>
                     </div>
                   ))}

@@ -3,6 +3,7 @@
 import { Download, Crown, VolumeX, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { VideoFormat, AudioFormat } from "@/types/video";
+import { useI18n } from "@/lib/i18n";
 
 interface QualitySelectorProps {
   formats: VideoFormat[] | AudioFormat[];
@@ -25,6 +26,7 @@ export function QualitySelector({
   onDownload,
   downloading,
 }: QualitySelectorProps) {
+  const { t } = useI18n();
   if (formats.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-white/30">
@@ -125,12 +127,12 @@ export function QualitySelector({
         {downloading ? (
           <>
             <Loader2 className="size-4 animate-spin" />
-            Downloading...
+            {t("video.downloading")}
           </>
         ) : (
           <>
             <Download className="size-4" />
-            {selectedId ? "Download" : "Select a format"}
+            {selectedId ? t("video.download") : t("video.selectQuality")}
           </>
         )}
       </button>

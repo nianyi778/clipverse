@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
+import { useI18n } from "@/lib/i18n";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 24 },
@@ -44,87 +45,6 @@ interface Tier {
   highlighted: boolean;
 }
 
-const tiers: Tier[] = [
-  {
-    name: "Free",
-    monthlyPrice: "$0",
-    yearlyPrice: "$0",
-    period: "forever",
-    yearlyPeriod: "forever",
-    description: "Perfect for casual downloads",
-    features: [
-      "5 downloads / day",
-      "Up to 1080p quality",
-      "30 min max duration",
-      "Standard speed",
-      "Basic formats",
-    ],
-    cta: "Get Started Free",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    badge: "Most Popular",
-    badgeGradient: "from-violet-600 to-purple-600",
-    monthlyPrice: "$3.99",
-    yearlyPrice: "$24.99",
-    period: "/month",
-    yearlyPeriod: "/year",
-    description: "For power users who need more",
-    features: [
-      "Unlimited downloads",
-      "4K unlimited quality",
-      "2 hour max duration",
-      "Batch download (10 at once)",
-      "Chrome Extension",
-      "Priority speed",
-      "All formats & codecs",
-      "Audio/video separation",
-    ],
-    cta: "Start Pro Trial",
-    highlighted: true,
-  },
-  {
-    name: "Lifetime",
-    badge: "Limited: 200 spots",
-    badgeGradient: "from-amber-500 to-orange-500",
-    monthlyPrice: "$29.99",
-    yearlyPrice: "$29.99",
-    period: "one-time",
-    yearlyPeriod: "one-time",
-    originalPrice: "$49.99",
-    description: "Everything, forever. No recurring fees.",
-    features: [
-      "Everything in Pro",
-      "Lifetime updates",
-      "AI Subtitles",
-      "10GB cloud storage",
-      "API access",
-      "Priority support",
-      "Early adopter badge",
-    ],
-    cta: "Get Lifetime Access",
-    highlighted: false,
-  },
-  {
-    name: "Team",
-    monthlyPrice: "$9.99",
-    yearlyPrice: "$6.99",
-    period: "/person/mo",
-    yearlyPeriod: "/person/mo",
-    description: "For teams that need commercial use",
-    features: [
-      "Everything in Lifetime",
-      "Team management dashboard",
-      "50GB shared storage",
-      "Commercial license",
-      "SLA & dedicated support",
-    ],
-    cta: "Start Team Trial",
-    highlighted: false,
-  },
-];
-
 interface ComparisonRow {
   feature: string;
   free: string | boolean;
@@ -133,63 +53,10 @@ interface ComparisonRow {
   team: string | boolean;
 }
 
-const comparisonData: ComparisonRow[] = [
-  { feature: "Downloads per day", free: "5", pro: "Unlimited", lifetime: "Unlimited", team: "Unlimited" },
-  { feature: "Max quality", free: "1080p", pro: "4K", lifetime: "4K", team: "4K" },
-  { feature: "Max duration", free: "30 min", pro: "2 hours", lifetime: "2 hours", team: "2 hours" },
-  { feature: "Batch download", free: false, pro: "10 at once", lifetime: "10 at once", team: "10 at once" },
-  { feature: "Chrome Extension", free: false, pro: true, lifetime: true, team: true },
-  { feature: "Priority speed", free: false, pro: true, lifetime: true, team: true },
-  { feature: "All formats & codecs", free: false, pro: true, lifetime: true, team: true },
-  { feature: "Audio/video separation", free: false, pro: true, lifetime: true, team: true },
-  { feature: "Lifetime updates", free: false, pro: false, lifetime: true, team: true },
-  { feature: "AI Subtitles", free: false, pro: false, lifetime: true, team: true },
-  { feature: "Cloud storage", free: false, pro: false, lifetime: "10GB", team: "50GB shared" },
-  { feature: "API access", free: false, pro: false, lifetime: true, team: true },
-  { feature: "Priority support", free: false, pro: false, lifetime: true, team: true },
-  { feature: "Early adopter badge", free: false, pro: false, lifetime: true, team: true },
-  { feature: "Team management", free: false, pro: false, lifetime: false, team: true },
-  { feature: "Commercial license", free: false, pro: false, lifetime: false, team: true },
-  { feature: "SLA & support", free: false, pro: false, lifetime: false, team: true },
-];
-
 interface FAQItem {
   question: string;
   answer: string;
 }
-
-const faqItems: FAQItem[] = [
-  {
-    question: "Can I cancel my subscription anytime?",
-    answer:
-      "Yes! You can cancel your Pro or Team subscription at any time from your account settings. Your access continues until the end of the current billing period. No questions asked, no cancellation fees.",
-  },
-  {
-    question: "What payment methods do you accept?",
-    answer:
-      "We accept all major credit and debit cards (Visa, Mastercard, American Express) via Stripe. We also support Alipay and WeChat Pay for users in China and Asia. All transactions are encrypted with 256-bit SSL.",
-  },
-  {
-    question: "Is there a free trial for Pro?",
-    answer:
-      "We offer a generous Free plan so you can try ClipVerse without any commitment. When you're ready to upgrade, Pro comes with a 7-day money-back guarantee — if you're not satisfied, we'll refund you in full.",
-  },
-  {
-    question: "What happens when the 200 Lifetime spots run out?",
-    answer:
-      "The early bird price of $29.99 is exclusive to our first 200 users. Once all spots are claimed, the Lifetime plan will be priced at $49.99. If you're interested, we recommend acting fast — spots are going quickly.",
-  },
-  {
-    question: "Can I switch between plans?",
-    answer:
-      "Absolutely. You can upgrade or downgrade at any time from your dashboard. When upgrading mid-cycle, you'll receive prorated credit for the remaining time on your current plan.",
-  },
-  {
-    question: "Do you offer refunds?",
-    answer:
-      "We offer a 7-day money-back guarantee on all paid plans, including Lifetime. If you're not satisfied within the first 7 days, contact our support team for a full, no-questions-asked refund.",
-  },
-];
 
 function FAQAccordion({ item, index }: { item: FAQItem; index: number }) {
   const [open, setOpen] = useState(false);
@@ -250,6 +117,7 @@ export default function PricingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { data: session } = useSession();
   const router = useRouter();
+  const { t } = useI18n();
 
   const handleCheckout = async (tierName: string) => {
     const plan = tierName.toLowerCase();
@@ -281,6 +149,116 @@ export default function PricingPage() {
     }
   };
 
+  const tiers: Tier[] = [
+    {
+      name: t("pricing.free.name"),
+      monthlyPrice: "$0",
+      yearlyPrice: "$0",
+      period: t("pricing.period.forever"),
+      yearlyPeriod: t("pricing.period.forever"),
+      description: t("pricing.free.description"),
+      features: [
+        t("pricing.free.feature1"),
+        t("pricing.free.feature2"),
+        t("pricing.free.feature3"),
+        t("pricing.free.feature4"),
+        t("pricing.free.feature5"),
+      ],
+      cta: t("pricing.free.cta"),
+      highlighted: false,
+    },
+    {
+      name: t("pricing.pro.name"),
+      badge: t("pricing.pro.badge"),
+      badgeGradient: "from-violet-600 to-purple-600",
+      monthlyPrice: "$3.99",
+      yearlyPrice: "$24.99",
+      period: t("pricing.period.month"),
+      yearlyPeriod: t("pricing.period.year"),
+      description: t("pricing.pro.description"),
+      features: [
+        t("pricing.pro.feature1"),
+        t("pricing.pro.feature2"),
+        t("pricing.pro.feature3"),
+        t("pricing.pro.feature4"),
+        t("pricing.pro.feature5"),
+        t("pricing.pro.feature6"),
+        t("pricing.pro.feature7"),
+        t("pricing.pro.feature8"),
+      ],
+      cta: t("pricing.pro.cta"),
+      highlighted: true,
+    },
+    {
+      name: t("pricing.lifetime.name"),
+      badge: t("pricing.lifetime.badge"),
+      badgeGradient: "from-amber-500 to-orange-500",
+      monthlyPrice: "$29.99",
+      yearlyPrice: "$29.99",
+      period: t("pricing.period.onetime"),
+      yearlyPeriod: t("pricing.period.onetime"),
+      originalPrice: "$49.99",
+      description: t("pricing.lifetime.description"),
+      features: [
+        t("pricing.lifetime.feature1"),
+        t("pricing.lifetime.feature2"),
+        t("pricing.lifetime.feature3"),
+        t("pricing.lifetime.feature4"),
+        t("pricing.lifetime.feature5"),
+        t("pricing.lifetime.feature6"),
+        t("pricing.lifetime.feature7"),
+      ],
+      cta: t("pricing.lifetime.cta"),
+      highlighted: false,
+    },
+    {
+      name: t("pricing.team.name"),
+      monthlyPrice: "$9.99",
+      yearlyPrice: "$6.99",
+      period: t("pricing.period.person.month"),
+      yearlyPeriod: t("pricing.period.person.month"),
+      description: t("pricing.team.description"),
+      features: [
+        t("pricing.team.feature1"),
+        t("pricing.team.feature2"),
+        t("pricing.team.feature3"),
+        t("pricing.team.feature4"),
+        t("pricing.team.feature5"),
+      ],
+      cta: t("pricing.team.cta"),
+      highlighted: false,
+    },
+  ];
+
+  const comparisonData: ComparisonRow[] = [
+    { feature: t("pricing.compare.row.downloads"), free: "5", pro: t("pricing.compare.value.unlimited"), lifetime: t("pricing.compare.value.unlimited"), team: t("pricing.compare.value.unlimited") },
+    { feature: t("pricing.compare.row.quality"), free: "1080p", pro: "4K", lifetime: "4K", team: "4K" },
+    { feature: t("pricing.compare.row.duration"), free: t("pricing.compare.value.30min"), pro: t("pricing.compare.value.2hours"), lifetime: t("pricing.compare.value.2hours"), team: t("pricing.compare.value.2hours") },
+    { feature: t("pricing.compare.row.batch"), free: false, pro: t("pricing.compare.value.10atonce"), lifetime: t("pricing.compare.value.10atonce"), team: t("pricing.compare.value.10atonce") },
+    { feature: t("pricing.compare.row.chrome"), free: false, pro: true, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.speed"), free: false, pro: true, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.formats"), free: false, pro: true, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.separation"), free: false, pro: true, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.updates"), free: false, pro: false, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.subtitles"), free: false, pro: false, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.storage"), free: false, pro: false, lifetime: t("pricing.compare.value.10gb"), team: t("pricing.compare.value.50gb.shared") },
+    { feature: t("pricing.compare.row.api"), free: false, pro: false, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.support"), free: false, pro: false, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.badge"), free: false, pro: false, lifetime: true, team: true },
+    { feature: t("pricing.compare.row.team"), free: false, pro: false, lifetime: false, team: true },
+    { feature: t("pricing.compare.row.license"), free: false, pro: false, lifetime: false, team: true },
+    { feature: t("pricing.compare.row.sla"), free: false, pro: false, lifetime: false, team: true },
+  ];
+
+  const faqItems: FAQItem[] = [
+    { question: t("pricing.faq.q1"), answer: t("pricing.faq.a1") },
+    { question: t("pricing.faq.q2"), answer: t("pricing.faq.a2") },
+    { question: t("pricing.faq.q3"), answer: t("pricing.faq.a3") },
+    { question: t("pricing.faq.q4"), answer: t("pricing.faq.a4") },
+    { question: t("pricing.faq.q5"), answer: t("pricing.faq.a5") },
+    { question: t("pricing.faq.q6"), answer: t("pricing.faq.a6") },
+  ];
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <Navbar />
@@ -311,7 +289,7 @@ export default function PricingPage() {
           <motion.div variants={fadeInUp} transition={{ duration: 0.5 }}>
             <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 text-xs text-white/50 backdrop-blur-sm">
               <Zap className="size-3 text-violet-400" />
-              No hidden fees — upgrade or cancel anytime
+              {t("pricing.hero.badge")}
             </span>
           </motion.div>
 
@@ -320,9 +298,9 @@ export default function PricingPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mb-4 text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl"
           >
-            Simple, Transparent{" "}
+            {t("pricing.hero.title1")}{" "}
             <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-              Pricing
+              {t("pricing.hero.title2")}
             </span>
           </motion.h1>
 
@@ -331,7 +309,7 @@ export default function PricingPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mb-10 max-w-xl text-lg text-white/40"
           >
-            Start free. Upgrade when you need more power.
+            {t("pricing.hero.subtitle")}
           </motion.p>
 
           {/* Billing toggle */}
@@ -350,7 +328,7 @@ export default function PricingPage() {
                   : "text-white/50 hover:text-white/80"
               )}
             >
-              Monthly
+              {t("pricing.hero.monthly")}
             </button>
             <button
               type="button"
@@ -362,7 +340,7 @@ export default function PricingPage() {
                   : "text-white/50 hover:text-white/80"
               )}
             >
-              Yearly
+              {t("pricing.hero.yearly")}
               <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
                 -30%
               </span>
@@ -425,14 +403,14 @@ export default function PricingPage() {
                       {yearly ? tier.yearlyPeriod : tier.period}
                     </span>
                   </div>
-                  {yearly && tier.name === "Team" && (
+                  {yearly && tier.name === t("pricing.team.name") && (
                     <p className="mt-1.5 text-xs text-emerald-400/70">
-                      billed yearly per person
+                      {t("pricing.team.billed")}
                     </p>
                   )}
-                  {yearly && tier.name === "Pro" && (
+                  {yearly && tier.name === t("pricing.pro.name") && (
                     <p className="mt-1.5 text-xs text-emerald-400/70">
-                      billed annually
+                      {t("pricing.pro.billed")}
                     </p>
                   )}
                 </div>
@@ -485,19 +463,19 @@ export default function PricingPage() {
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-cyan-400"
             >
-              Compare
+              {t("pricing.compare.label")}
             </motion.p>
             <motion.h2
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl"
             >
-              Feature Comparison
+              {t("pricing.compare.title")}
             </motion.h2>
             <motion.p
               variants={fadeInUp}
               className="mt-3 text-white/40"
             >
-              See exactly what you get with each plan.
+              {t("pricing.compare.subtitle")}
             </motion.p>
           </motion.div>
 
@@ -511,19 +489,19 @@ export default function PricingPage() {
               <thead>
                 <tr className="border-b border-white/[0.06]">
                   <th className="px-5 py-4 text-left text-sm font-medium text-white/40">
-                    Feature
+                    {t("pricing.compare.feature")}
                   </th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-white/50">
-                    Free
+                    {t("pricing.free.name")}
                   </th>
                   <th className="bg-violet-500/[0.04] px-4 py-4 text-center text-sm font-semibold text-violet-400">
-                    Pro
+                    {t("pricing.pro.name")}
                   </th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-white/50">
-                    Lifetime
+                    {t("pricing.lifetime.name")}
                   </th>
                   <th className="px-4 py-4 text-center text-sm font-semibold text-white/50">
-                    Team
+                    {t("pricing.team.name")}
                   </th>
                 </tr>
               </thead>
@@ -569,7 +547,7 @@ export default function PricingPage() {
           transition={{ duration: 0.5, delay: 0.8 }}
         >
           <p className="mb-6 text-sm font-medium uppercase tracking-widest text-white/25">
-            Secure Payments
+            {t("pricing.payment.title")}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-8">
             <div className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-5 py-3">
@@ -588,7 +566,7 @@ export default function PricingPage() {
             </div>
           </div>
           <p className="mt-5 text-xs text-white/20">
-            All transactions are encrypted with 256-bit SSL protection.
+            {t("pricing.payment.note")}
           </p>
         </motion.div>
       </section>
@@ -606,13 +584,13 @@ export default function PricingPage() {
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-violet-400"
             >
-              FAQ
+              {t("pricing.faq.label")}
             </motion.p>
             <motion.h2
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl"
             >
-              Common Questions
+              {t("pricing.faq.title")}
             </motion.h2>
           </motion.div>
 
@@ -633,17 +611,16 @@ export default function PricingPage() {
           transition={{ duration: 0.5, delay: 0.8 }}
         >
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Ready to download?
+            {t("pricing.cta.title")}
           </h2>
           <p className="mx-auto mb-8 max-w-md text-white/40">
-            Join 200K+ users who trust ClipVerse for fast, high-quality video
-            downloads.
+            {t("pricing.cta.subtitle")}
           </p>
           <a
             href="/register"
             className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]"
           >
-            Get Started Free
+            {t("pricing.cta.button")}
             <ArrowRight className="size-4" />
           </a>
         </motion.div>

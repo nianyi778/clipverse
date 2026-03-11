@@ -284,13 +284,13 @@ export function Navbar() {
             <>
               <a
                 href="/login"
-                className="rounded-lg px-3 py-1.5 text-sm text-white/60 transition-colors hover:text-white"
+                className="rounded-full border border-white/[0.12] px-3 py-1.5 text-sm text-white/60 transition-all hover:border-white/[0.25] hover:text-white"
               >
                 {t("nav.login")}
               </a>
               <a
                 href="/register"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_24px_rgba(124,58,237,0.3)]"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_24px_rgba(124,58,237,0.3)]"
               >
                 {t("nav.register")}
                 <ArrowRight className="size-3.5" />
@@ -384,14 +384,14 @@ export function Navbar() {
                     <a
                       href="/login"
                       onClick={closeMobile}
-                      className="px-3 py-2.5 text-white/50 transition-colors hover:text-white"
+                      className="rounded-full border border-white/[0.12] px-3 py-2.5 text-center text-white/50 transition-all hover:border-white/[0.25] hover:text-white"
                     >
                       {t("nav.login")}
                     </a>
                     <a
                       href="/register"
                       onClick={closeMobile}
-                      className="rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-center text-sm font-medium text-white"
+                      className="rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-center text-sm font-medium text-white"
                     >
                       {t("nav.register")}
                     </a>

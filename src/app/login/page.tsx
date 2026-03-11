@@ -4,9 +4,22 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+  Download,
+  Zap,
+  Users,
+  Shield,
+  Sparkles,
+  Play,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Navbar } from "@/components/navbar";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -19,6 +32,15 @@ const stagger = {
 
 type AuthMode = "login" | "register";
 
+const valueProps = [
+  { icon: Play, title: "YouTube 4K & 8K", desc: "Download in highest quality available" },
+  { icon: Shield, title: "TikTok No Watermark", desc: "Clean downloads without branding" },
+  { icon: Download, title: "Batch Download", desc: "Queue multiple videos at once" },
+  { icon: Zap, title: "Lightning Fast", desc: "Optimized servers for maximum speed" },
+  { icon: Sparkles, title: "50+ Platforms", desc: "YouTube, TikTok, Instagram, Twitter & more" },
+  { icon: Users, title: "200K+ Users", desc: "Trusted by creators worldwide" },
+];
+
 function LoginPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -29,6 +51,7 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("mode") === "register") setMode("register");
@@ -90,21 +113,173 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <Navbar />
+    <div className="relative min-h-screen lg:grid lg:grid-cols-2">
+      <div className="relative hidden overflow-hidden bg-gradient-to-br from-violet-950/50 via-slate-950 to-slate-950 lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+            backgroundSize: "64px 64px",
+          }}
+        />
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-[500px] w-[600px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(124,58,237,0.15)_0%,transparent_70%)]" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 h-[400px] w-[400px] rounded-full bg-[radial-gradient(ellipse,rgba(139,92,246,0.08)_0%,transparent_70%)]" />
 
-      <section className="flex min-h-screen items-center justify-center px-6 pt-20">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-1/2 top-[30%] h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(124,58,237,0.1)_0%,transparent_70%)]" />
+        <div className="relative z-10">
+          <a href="/" className="group inline-flex items-center gap-2.5">
+            <svg
+              viewBox="0 0 36 36"
+              className="size-9 shrink-0"
+              role="img"
+              aria-hidden="true"
+              style={{ filter: "drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4))" }}
+            >
+              <defs>
+                <linearGradient id="cv-l-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8b5cf6" />
+                  <stop offset="50%" stopColor="#7c3aed" />
+                  <stop offset="100%" stopColor="#6d28d9" />
+                </linearGradient>
+                <linearGradient id="cv-l-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0.25" />
+                  <stop offset="50%" stopColor="#fff" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="cv-l-play" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="100%" stopColor="#e9d5ff" />
+                </linearGradient>
+              </defs>
+              <rect x="2" y="2" width="32" height="32" rx="8" fill="#4c1d95" />
+              <rect x="1" y="1" width="32" height="32" rx="8" fill="url(#cv-l-bg)" />
+              <rect x="1" y="1" width="32" height="16" rx="8" fill="url(#cv-l-shine)" />
+              <path d="M14 11.5L24 18L14 24.5V11.5Z" fill="url(#cv-l-play)" />
+              <path d="M14 11.5L14 24.5L24 18L14 11.5Z" fill="#fff" fillOpacity="0.15" style={{ transform: "translateX(-1px)" }} />
+            </svg>
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-violet-400 to-purple-500 bg-clip-text text-transparent">
+              ClipVerse
+            </span>
+          </a>
+        </div>
+
+        <div className="relative z-10 -mt-8">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-2 text-4xl font-bold leading-tight text-white"
+          >
+            The fastest way to
+            <br />
+            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
+              download videos
+            </span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mb-10 max-w-sm text-white/40"
+          >
+            Save videos from any platform in seconds. No watermarks, highest quality, completely free.
+          </motion.p>
+
+          <div className="space-y-4">
+            {valueProps.map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 + i * 0.07 }}
+                className="flex items-start gap-3"
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
+                  <item.icon className="size-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white/90">{item.title}</p>
+                  <p className="text-xs text-white/35">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         <motion.div
-          className="relative z-10 w-full max-w-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="relative z-10"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {["A", "K", "M", "J"].map((letter) => (
+                <div
+                  key={letter}
+                  className="flex size-7 items-center justify-center rounded-full border-2 border-slate-950 bg-gradient-to-br from-violet-500 to-purple-600 text-[10px] font-bold text-white"
+                >
+                  {letter}
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white/70">200,000+ users</p>
+              <p className="text-xs text-white/30">Trusted worldwide</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="relative flex min-h-screen flex-col bg-[#0a0a0f] px-6 py-8 lg:min-h-0 lg:justify-center lg:px-16">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-[30%] h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(124,58,237,0.08)_0%,transparent_70%)]" />
+        </div>
+
+        <div className="relative z-10 mb-12 lg:mb-16">
+          <a href="/" className="group inline-flex items-center gap-2">
+            <svg
+              viewBox="0 0 36 36"
+              className="size-7 shrink-0"
+              role="img"
+              aria-hidden="true"
+              style={{ filter: "drop-shadow(0 4px 12px rgba(124, 58, 237, 0.4))" }}
+            >
+              <defs>
+                <linearGradient id="cv-r-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8b5cf6" />
+                  <stop offset="50%" stopColor="#7c3aed" />
+                  <stop offset="100%" stopColor="#6d28d9" />
+                </linearGradient>
+                <linearGradient id="cv-r-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0.25" />
+                  <stop offset="50%" stopColor="#fff" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="cv-r-play" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="100%" stopColor="#e9d5ff" />
+                </linearGradient>
+              </defs>
+              <rect x="2" y="2" width="32" height="32" rx="8" fill="#4c1d95" />
+              <rect x="1" y="1" width="32" height="32" rx="8" fill="url(#cv-r-bg)" />
+              <rect x="1" y="1" width="32" height="16" rx="8" fill="url(#cv-r-shine)" />
+              <path d="M14 11.5L24 18L14 24.5V11.5Z" fill="url(#cv-r-play)" />
+              <path d="M14 11.5L14 24.5L24 18L14 11.5Z" fill="#fff" fillOpacity="0.15" style={{ transform: "translateX(-1px)" }} />
+            </svg>
+            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-violet-400 to-purple-500 bg-clip-text text-transparent transition-all duration-300 group-hover:from-violet-300 group-hover:to-purple-400">
+              ClipVerse
+            </span>
+          </a>
+        </div>
+
+        <motion.div
+          className="relative z-10 mx-auto w-full max-w-md lg:mx-0"
           initial="hidden"
           animate="visible"
           variants={stagger}
         >
-          <motion.div variants={fadeInUp} transition={{ duration: 0.5 }} className="mb-8 text-center">
+          <motion.div variants={fadeInUp} transition={{ duration: 0.5 }} className="mb-8">
             <h1 className="mb-2 text-3xl font-bold text-white">
               {mode === "login" ? "Welcome back" : "Create account"}
             </h1>
@@ -184,15 +359,24 @@ function LoginPageContent() {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/25" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={mode === "register" ? 8 : undefined}
                   disabled={loading}
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5 pl-11 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-violet-500/40 disabled:opacity-50"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3.5 pl-11 pr-11 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-violet-500/40 disabled:opacity-50"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-white/25 transition-colors hover:text-white/50"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
               </div>
               {mode === "login" && (
                 <div className="mt-1.5 text-right">
@@ -247,8 +431,23 @@ function LoginPageContent() {
               </>
             )}
           </motion.p>
+
+          <motion.p
+            variants={fadeInUp}
+            transition={{ duration: 0.4 }}
+            className="mt-8 text-center text-xs text-white/20"
+          >
+            By continuing, you agree to our{" "}
+            <a href="/privacy" className="text-white/30 underline underline-offset-2 transition-colors hover:text-violet-400">
+              Privacy Policy
+            </a>{" "}
+            and{" "}
+            <a href="/terms" className="text-white/30 underline underline-offset-2 transition-colors hover:text-violet-400">
+              Terms of Service
+            </a>
+          </motion.p>
         </motion.div>
-      </section>
+      </div>
     </div>
   );
 }
@@ -257,11 +456,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="relative min-h-screen">
-          <Navbar />
-          <div className="flex items-center justify-center pt-40">
-            <Loader2 className="size-6 animate-spin text-violet-400" />
-          </div>
+        <div className="flex min-h-screen items-center justify-center bg-[#0a0a0f]">
+          <Loader2 className="size-6 animate-spin text-violet-400" />
         </div>
       }
     >

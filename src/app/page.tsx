@@ -12,7 +12,6 @@ import {
   Subtitles,
   Check,
   Zap,
-  Send,
   Star,
   ChevronDown,
   Search,
@@ -23,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
 import { useI18n } from "@/lib/i18n";
+import { Footer } from "@/components/footer";
 
 /* ─── Types ─── */
 
@@ -99,136 +99,7 @@ const features: Feature[] = [
   },
 ];
 
-const pricingTiers: PricingTier[] = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for casual downloads",
-    features: [
-      "5 downloads / day",
-      "Up to 1080p quality",
-      "Standard speed",
-      "Basic format options",
-    ],
-    cta: "Get Started Free",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "$3.99",
-    period: "/month",
-    description: "For power users who need more",
-    features: [
-      "Unlimited downloads",
-      "Up to 4K quality",
-      "Batch download (10 at once)",
-      "Chrome Extension",
-      "Priority speed",
-      "All formats & codecs",
-    ],
-    cta: "Start Pro Trial",
-    highlighted: true,
-    badge: "Most Popular",
-    badgeGradient: "from-violet-600 to-purple-600",
-  },
-  {
-    name: "Lifetime",
-    price: "$29.99",
-    originalPrice: "$49.99",
-    period: "one-time",
-    description: "Everything, forever. No recurring fees.",
-    features: [
-      "Everything in Pro",
-      "Lifetime updates",
-      "AI Subtitles",
-      "API access",
-      "Priority support",
-    ],
-    cta: "Buy Lifetime",
-    highlighted: false,
-    badge: "Best Value",
-    badgeGradient: "from-emerald-500 to-teal-500",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Sarah Chen",
-    role: "Content Creator",
-    quote:
-      "ClipVerse replaced 3 different tools I was juggling. The batch download feature alone saves me hours every week when repurposing content.",
-    stars: 5,
-    gradient: "from-violet-500 to-purple-600",
-  },
-  {
-    name: "Marcus Rivera",
-    role: "Film Student",
-    quote:
-      "Finally a downloader that actually delivers real 4K quality. The codec options are exactly what I needed for my editing projects.",
-    stars: 5,
-    gradient: "from-fuchsia-500 to-pink-600",
-  },
-  {
-    name: "Yuki Tanaka",
-    role: "Social Media Manager",
-    quote:
-      "Managing content across 6 platforms used to be a nightmare. The Chrome extension makes it one-click easy.",
-    stars: 5,
-    gradient: "from-cyan-500 to-blue-600",
-  },
-  {
-    name: "Alex Thompson",
-    role: "Freelance Editor",
-    quote:
-      "The AI subtitle extraction is incredibly accurate. Saved my project deadline with translations in minutes, not hours.",
-    stars: 4,
-    gradient: "from-amber-500 to-orange-600",
-  },
-];
-
-const faqs = [
-  {
-    question: "Is ClipVerse free to use?",
-    answer:
-      "Yes! Our free tier includes 5 downloads per day at up to 1080p quality. No credit card required. Upgrade to Pro or Lifetime for unlimited downloads and 4K quality.",
-  },
-  {
-    question: "Which platforms are supported?",
-    answer:
-      "We support 11+ platforms including YouTube, TikTok, Instagram, Twitter/X, Bilibili, 小红书, 抖音, Facebook, Threads, Pinterest, and Vimeo. We regularly add new platforms based on user requests.",
-  },
-  {
-    question: "What video quality options are available?",
-    answer:
-      "Free users can download up to 1080p. Pro and Lifetime plans unlock 4K Ultra HD with multiple codec options including AV1, VP9, and H.264. Audio-only downloads are also available.",
-  },
-  {
-    question: "Do I need to install any software?",
-    answer:
-      "No installation needed — ClipVerse works entirely in your browser. We also offer an optional Chrome extension that adds a one-click download button directly on video pages.",
-  },
-  {
-    question: "How does batch downloading work?",
-    answer:
-      "Pro and Lifetime users can queue up to 10 videos simultaneously. Paste multiple URLs, select your preferred quality for each, and let ClipVerse handle the rest with built-in queue management.",
-  },
-  {
-    question: "Is it legal to download videos?",
-    answer:
-      "ClipVerse is designed for downloading content you have rights to access, such as your own uploads or Creative Commons content. Always respect copyright and platform terms of service.",
-  },
-  {
-    question: "What about AI subtitles?",
-    answer:
-      "Our Lifetime plan includes AI-powered subtitle extraction supporting 50+ languages. Download subtitles as SRT files or embed them directly into your videos.",
-  },
-  {
-    question: "Is my data and privacy safe?",
-    answer:
-      "We take privacy seriously. Downloaded videos are never stored on our servers — all processing happens in real-time. We don't log URLs or track your download history.",
-  },
-];
+/* pricingTiers, testimonials, faqs moved inside Home component for i18n */
 
 /* ─── Platform Logos ─── */
 
@@ -537,6 +408,59 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const router = useRouter();
 
+  const pricingTiers: PricingTier[] = [
+    {
+      name: t("home.pricing.free.name"),
+      price: "$0",
+      period: t("home.pricing.free.period"),
+      description: t("home.pricing.free.desc"),
+      features: [t("home.pricing.free.f1"), t("home.pricing.free.f2"), t("home.pricing.free.f3"), t("home.pricing.free.f4")],
+      cta: t("home.pricing.free.cta"),
+      highlighted: false,
+    },
+    {
+      name: t("home.pricing.pro.name"),
+      price: "$3.99",
+      period: t("home.pricing.pro.period"),
+      description: t("home.pricing.pro.desc"),
+      features: [t("home.pricing.pro.f1"), t("home.pricing.pro.f2"), t("home.pricing.pro.f3"), t("home.pricing.pro.f4"), t("home.pricing.pro.f5"), t("home.pricing.pro.f6")],
+      cta: t("home.pricing.pro.cta"),
+      highlighted: true,
+      badge: t("home.pricing.pro.badge"),
+      badgeGradient: "from-violet-600 to-purple-600",
+    },
+    {
+      name: t("home.pricing.lifetime.name"),
+      price: "$29.99",
+      originalPrice: t("home.pricing.lifetime.originalPrice"),
+      period: t("home.pricing.lifetime.period"),
+      description: t("home.pricing.lifetime.desc"),
+      features: [t("home.pricing.lifetime.f1"), t("home.pricing.lifetime.f2"), t("home.pricing.lifetime.f3"), t("home.pricing.lifetime.f4"), t("home.pricing.lifetime.f5")],
+      cta: t("home.pricing.lifetime.cta"),
+      highlighted: false,
+      badge: t("home.pricing.lifetime.badge"),
+      badgeGradient: "from-emerald-500 to-teal-500",
+    },
+  ];
+
+  const testimonials = [
+    { name: t("home.testimonials.t1.name"), role: t("home.testimonials.t1.role"), quote: t("home.testimonials.t1.quote"), stars: 5, gradient: "from-violet-500 to-purple-600" },
+    { name: t("home.testimonials.t2.name"), role: t("home.testimonials.t2.role"), quote: t("home.testimonials.t2.quote"), stars: 5, gradient: "from-fuchsia-500 to-pink-600" },
+    { name: t("home.testimonials.t3.name"), role: t("home.testimonials.t3.role"), quote: t("home.testimonials.t3.quote"), stars: 5, gradient: "from-cyan-500 to-blue-600" },
+    { name: t("home.testimonials.t4.name"), role: t("home.testimonials.t4.role"), quote: t("home.testimonials.t4.quote"), stars: 4, gradient: "from-amber-500 to-orange-600" },
+  ];
+
+  const faqs = [
+    { question: t("home.faq.q1"), answer: t("home.faq.a1") },
+    { question: t("home.faq.q2"), answer: t("home.faq.a2") },
+    { question: t("home.faq.q3"), answer: t("home.faq.a3") },
+    { question: t("home.faq.q4"), answer: t("home.faq.a4") },
+    { question: t("home.faq.q5"), answer: t("home.faq.a5") },
+    { question: t("home.faq.q6"), answer: t("home.faq.a6") },
+    { question: t("home.faq.q7"), answer: t("home.faq.a7") },
+    { question: t("home.faq.q8"), answer: t("home.faq.a8") },
+  ];
+
   const handleDownload = () => {
     const trimmed = url.trim();
     if (!trimmed) return;
@@ -580,7 +504,7 @@ export default function Home() {
               <motion.div variants={fadeInUp} transition={{ duration: 0.5 }}>
                 <span className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 text-xs text-white/50 backdrop-blur-sm">
                   <Zap className="size-3 text-violet-400" />
-                  Trusted by 200K+ users worldwide
+                  {t("home.trusted")}
                 </span>
               </motion.div>
 
@@ -681,14 +605,12 @@ export default function Home() {
             <motion.p
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-emerald-400"
-            >
-              How It Works
-            </motion.p>
+            >{t("home.howItWorks.label")}</motion.p>
             <motion.h2
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
             >
-              Three steps. That&apos;s it.
+              {t("home.howItWorks.title")}
             </motion.h2>
           </motion.div>
 
@@ -697,23 +619,23 @@ export default function Home() {
               {
                 step: 1,
                 icon: Copy,
-                title: "Copy Link",
+                title: t("home.howItWorks.step1.title"),
                 description:
-                  "Find a video on any supported platform and copy its URL from the browser or share menu.",
+                  t("home.howItWorks.step1.desc"),
               },
               {
                 step: 2,
                 icon: Search,
-                title: "Paste & Analyze",
+                title: t("home.howItWorks.step2.title"),
                 description:
-                  "Paste the URL into ClipVerse. We instantly detect the platform, quality options, and formats.",
+                  t("home.howItWorks.step2.desc"),
               },
               {
                 step: 3,
                 icon: Download,
-                title: "Download",
+                title: t("home.howItWorks.step3.title"),
                 description:
-                  "Choose your preferred quality and format. Click download. Done in seconds.",
+                  t("home.howItWorks.step3.desc"),
               },
             ].map((item, i) => {
               const Icon = item.icon;
@@ -827,14 +749,13 @@ export default function Home() {
               variants={fadeInUp}
               className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
             >
-              Loved by creators worldwide
+              {t("home.testimonials.title")}
             </motion.h2>
             <motion.p
               variants={fadeInUp}
               className="mx-auto max-w-xl text-lg text-white/40"
             >
-              Join thousands of content creators, editors, and social media
-              managers who trust ClipVerse daily.
+              {t("home.testimonials.subtitle")}
             </motion.p>
           </motion.div>
 
@@ -919,7 +840,7 @@ export default function Home() {
               variants={fadeInUp}
               className="mx-auto max-w-xl text-lg text-white/40"
             >
-              Start free. Upgrade when you need more power.
+              {t("home.pricing.subtitle")}
             </motion.p>
           </motion.div>
 
@@ -1020,7 +941,7 @@ export default function Home() {
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
             >
-              Frequently Asked Questions
+              {t("home.faq.title")}
             </motion.h2>
           </motion.div>
 
@@ -1053,127 +974,26 @@ export default function Home() {
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 text-xs text-white/40">
             <Shield className="size-3 text-emerald-400" />
-            No credit card required
+            {t("home.cta.badge")}
           </div>
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Ready to download?
+            {t("home.cta.title")}
           </h2>
           <p className="mx-auto mb-8 max-w-md text-white/40">
-            Join 200K+ users who trust ClipVerse for fast, high-quality video
-            downloads.
+            {t("home.cta.subtitle")}
           </p>
           <a
             href="/register"
             className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]"
           >
-            Get Started Free
+            {t("home.cta.button")}
             <ArrowRight className="size-4" />
           </a>
         </motion.div>
       </section>
 
       {/* ────── FOOTER ────── */}
-      <footer className="border-t border-white/[0.04] px-6 py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-12">
-            <div className="col-span-2 md:col-span-1">
-              <span className="bg-gradient-to-r from-violet-400 to-purple-500 bg-clip-text text-xl font-bold tracking-tight text-transparent">
-                ClipVerse
-              </span>
-              <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/30">
-                The fastest way to download videos from any platform. Free,
-                fast, and beautiful.
-              </p>
-              <a
-                href="https://t.me/clipverse"
-                className="mt-4 inline-flex items-center gap-2 text-sm text-white/30 transition-colors hover:text-white/60"
-              >
-                <Send className="size-4" />
-                Telegram
-              </a>
-            </div>
-
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-white/60">
-                Product
-              </h4>
-              <ul className="space-y-2.5">
-                {["Home", "Download", "Pricing", "Chrome Extension"].map(
-                  (link) => (
-                    <li key={link}>
-                      <a
-                        href={`/${link.toLowerCase().replace(/\s+/g, "-")}`}
-                        className="text-sm text-white/30 transition-colors hover:text-white/60"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-white/60">
-                Support
-              </h4>
-              <ul className="space-y-2.5">
-                {["FAQ", "Blog", "Contact", "API Docs"].map((link) => (
-                  <li key={link}>
-                    <a
-                      href={`/${link.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="text-sm text-white/30 transition-colors hover:text-white/60"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-white/60">
-                Popular
-              </h4>
-              <ul className="space-y-2.5">
-                {[
-                  "YouTube 4K Downloader",
-                  "TikTok No Watermark",
-                  "Instagram Reels Saver",
-                  "Bilibili Video Download",
-                  "Twitter Video Download",
-                ].map((link) => (
-                  <li key={link}>
-                    <a
-                      href={`/${link.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="text-sm text-white/30 transition-colors hover:text-white/60"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-between gap-4 border-t border-white/[0.04] pt-8 md:flex-row">
-            <p className="text-xs text-white/20">
-              &copy; 2026 ClipVerse. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6">
-              {["Privacy", "Terms", "DMCA"].map((link) => (
-                <a
-                  key={link}
-                  href={`/${link.toLowerCase()}`}
-                  className="text-xs text-white/20 transition-colors hover:text-white/40"
-                >
-                  {link}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { DEFAULT_LOCALE, detectLocale, LOCALE_COOKIE_NAME } from "@/lib/locale";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -58,15 +60,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+  const initialLocale = detectLocale(
+    [
+      cookieStore.get(LOCALE_COOKIE_NAME)?.value,
+      headerStore.get("accept-language"),
+    ],
+    DEFAULT_LOCALE
+  );
+
   return (
-    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable}`}>
+    <html lang={initialLocale} className={`dark ${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <Providers initialLocale={initialLocale}>{children}</Providers>
       </body>
     </html>
   );

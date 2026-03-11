@@ -12,11 +12,12 @@ import {
   Subtitles,
   Film,
   ChevronDown,
-  Send,
   Check,
 } from "lucide-react";
 import { cn, extractUrl } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 type IconComponent = typeof Download;
 
@@ -169,6 +170,7 @@ function FAQAccordion({ item, index }: { item: FAQItem; index: number }) {
 }
 
 export default function BilibiliContent() {
+  const { t } = useI18n();
   const [url, setUrl] = useState("");
   const router = useRouter();
 
@@ -290,15 +292,11 @@ export default function BilibiliContent() {
             <motion.p
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-blue-400"
-            >
-              How It Works
-            </motion.p>
+            >{t("platform.howItWorks")}</motion.p>
             <motion.h2
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
-            >
-              Three Simple Steps
-            </motion.h2>
+            >{t("platform.threeSteps")}</motion.h2>
           </motion.div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -337,9 +335,7 @@ export default function BilibiliContent() {
             <motion.p
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-violet-400"
-            >
-              Features
-            </motion.p>
+            >{t("platform.features")}</motion.p>
             <motion.h2
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl"
@@ -390,9 +386,7 @@ export default function BilibiliContent() {
             <motion.p
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-violet-400"
-            >
-              FAQ
-            </motion.p>
+            >{t("platform.faq")}</motion.p>
             <motion.h2
               variants={fadeInUp}
               className="text-3xl font-bold tracking-tight text-white md:text-4xl"
@@ -428,15 +422,13 @@ export default function BilibiliContent() {
               href="/register"
               className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:from-violet-500 hover:to-purple-500 hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]"
             >
-              Get Started Free
+              {t("platform.cta.getStarted")}
               <ArrowRight className="size-4" />
             </a>
             <a
               href="/pricing"
               className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] px-8 py-3 text-sm font-medium text-white/65 transition-all hover:bg-white/[0.04] hover:text-white"
-            >
-              View Pricing
-            </a>
+            >{t("platform.cta.viewPricing")}</a>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-white/25">
             <span className="flex items-center gap-1.5">
@@ -456,103 +448,7 @@ export default function BilibiliContent() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.04] px-6 py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-12">
-            <div className="col-span-2 md:col-span-1">
-              <span className="bg-gradient-to-r from-violet-400 to-purple-500 bg-clip-text text-xl font-bold tracking-tight text-transparent">
-                ClipVerse
-              </span>
-              <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/30">
-                The fastest way to download videos from any platform. Free,
-                fast, and beautiful.
-              </p>
-              <a
-                href="https://t.me/clipverse"
-                className="mt-4 inline-flex items-center gap-2 text-sm text-white/30 transition-colors hover:text-white/60"
-              >
-                <Send className="size-4" />
-                Telegram
-              </a>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-white/60">
-                Product
-              </h4>
-              <ul className="space-y-2.5">
-                {["Home", "Download", "Pricing", "Chrome Extension"].map(
-                  (link) => (
-                    <li key={link}>
-                      <a
-                        href={`/${link.toLowerCase().replace(/\s+/g, "-")}`}
-                        className="text-sm text-white/30 transition-colors hover:text-white/60"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-white/60">
-                Support
-              </h4>
-              <ul className="space-y-2.5">
-                {["FAQ", "Blog", "Contact", "API Docs"].map((link) => (
-                  <li key={link}>
-                    <a
-                      href={`/${link.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="text-sm text-white/30 transition-colors hover:text-white/60"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 text-sm font-semibold text-white/60">
-                Popular
-              </h4>
-              <ul className="space-y-2.5">
-                {[
-                  { label: "YouTube 4K Downloader", href: "/youtube" },
-                  { label: "TikTok No Watermark", href: "/tiktok" },
-                  { label: "Instagram Reels Saver", href: "/instagram-reels-saver" },
-                  { label: "Bilibili Video Download", href: "/bilibili" },
-                  { label: "Twitter Video Download", href: "/twitter-video-download" },
-                ].map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-white/30 transition-colors hover:text-white/60"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-between gap-4 border-t border-white/[0.04] pt-8 md:flex-row">
-            <p className="text-xs text-white/20">
-              &copy; 2026 ClipVerse. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6">
-              {["Privacy", "Terms", "DMCA"].map((link) => (
-                <a
-                  key={link}
-                  href={`/${link.toLowerCase()}`}
-                  className="text-xs text-white/20 transition-colors hover:text-white/40"
-                >
-                  {link}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

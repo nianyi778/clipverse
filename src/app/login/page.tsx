@@ -20,6 +20,7 @@ import {
   Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -32,18 +33,21 @@ const stagger = {
 
 type AuthMode = "login" | "register";
 
-const valueProps = [
-  { icon: Play, title: "YouTube 4K & 8K", desc: "Download in highest quality available" },
-  { icon: Shield, title: "TikTok No Watermark", desc: "Clean downloads without branding" },
-  { icon: Download, title: "Batch Download", desc: "Queue multiple videos at once" },
-  { icon: Zap, title: "Lightning Fast", desc: "Optimized servers for maximum speed" },
-  { icon: Sparkles, title: "50+ Platforms", desc: "YouTube, TikTok, Instagram, Twitter & more" },
-  { icon: Users, title: "200K+ Users", desc: "Trusted by creators worldwide" },
-];
+/* valueProps moved inside component for i18n */
 
 function LoginPageContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const valueProps = [
+    { icon: Play, title: t("auth.vp.youtube"), desc: t("auth.vp.youtube.desc") },
+    { icon: Shield, title: t("auth.vp.tiktok"), desc: t("auth.vp.tiktok.desc") },
+    { icon: Download, title: t("auth.vp.batch"), desc: t("auth.vp.batch.desc") },
+    { icon: Zap, title: t("auth.vp.fast"), desc: t("auth.vp.fast.desc") },
+    { icon: Sparkles, title: t("auth.vp.platforms"), desc: t("auth.vp.platforms.desc") },
+    { icon: Users, title: t("auth.vp.users"), desc: t("auth.vp.users.desc") },
+  ];
   const [mode, setMode] = useState<AuthMode>("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -56,7 +60,7 @@ function LoginPageContent() {
   useEffect(() => {
     if (searchParams.get("mode") === "register") setMode("register");
     if (searchParams.get("error")) {
-      setError("Authentication failed. Please try again.");
+      setError(t("auth.error.failed"));
       setGoogleLoading(false);
     }
   }, [searchParams]);
@@ -75,7 +79,7 @@ function LoginPageContent() {
         });
         const data = await res.json();
         if (!data.success) {
-          setError(data.error || "Registration failed");
+          setError(data.error || t("auth.error.generic"));
           setLoading(false);
           return;
         }
@@ -88,7 +92,7 @@ function LoginPageContent() {
       });
 
       if (result?.error) {
-        setError(mode === "register" ? "Account created but login failed. Try logging in." : "Invalid email or password");
+        setError(mode === "register" ? t("auth.error.registerLogin") : t("auth.error.invalid"));
         setLoading(false);
         return;
       }
@@ -96,7 +100,7 @@ function LoginPageContent() {
       router.push("/download");
       router.refresh();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("auth.error.generic"));
       setLoading(false);
     }
   };
@@ -170,10 +174,10 @@ function LoginPageContent() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mb-2 text-4xl font-bold leading-tight text-white"
           >
-            The fastest way to
+            {t("auth.hero.title1")}
             <br />
             <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
-              download videos
+              {t("auth.hero.title2")}
             </span>
           </motion.h2>
           <motion.p
@@ -182,7 +186,7 @@ function LoginPageContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mb-10 max-w-sm text-white/40"
           >
-            Save videos from any platform in seconds. No watermarks, highest quality, completely free.
+            {t("auth.hero.subtitle")}
           </motion.p>
 
           <div className="space-y-4">
@@ -224,8 +228,8 @@ function LoginPageContent() {
               ))}
             </div>
             <div>
-              <p className="text-sm font-medium text-white/70">200,000+ users</p>
-              <p className="text-xs text-white/30">Trusted worldwide</p>
+              <p className="text-sm font-medium text-white/70">{t("auth.users")}</p>
+              <p className="text-xs text-white/30">{t("auth.trusted")}</p>
             </div>
           </div>
         </motion.div>
@@ -281,12 +285,10 @@ function LoginPageContent() {
         >
           <motion.div variants={fadeInUp} transition={{ duration: 0.5 }} className="mb-8">
             <h1 className="mb-2 text-3xl font-bold text-white">
-              {mode === "login" ? "Welcome back" : "Create account"}
+              {mode === "login" ? t("auth.login.title") : t("auth.register.title")}
             </h1>
             <p className="text-white/40">
-              {mode === "login"
-                ? "Log in to access your downloads"
-                : "Start downloading videos for free"}
+              {mode === "login" ? t("auth.login.subtitle") : t("auth.register.subtitle")}
             </p>
           </motion.div>
 
@@ -307,13 +309,13 @@ function LoginPageContent() {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
               )}
-              Continue with Google
+              {t("auth.google")}
             </button>
           </motion.div>
 
           <motion.div variants={fadeInUp} transition={{ duration: 0.4 }} className="my-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/[0.06]" />
-            <span className="text-xs text-white/25">or</span>
+            <span className="text-xs text-white/25">{t("auth.or")}</span>
             <div className="h-px flex-1 bg-white/[0.06]" />
           </motion.div>
 
@@ -333,7 +335,7 @@ function LoginPageContent() {
                 <User className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/25" />
                 <input
                   type="text"
-                  placeholder="Name (optional)"
+                  placeholder={t("auth.name.placeholder")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
@@ -346,7 +348,7 @@ function LoginPageContent() {
               <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/25" />
               <input
                 type="email"
-                placeholder="Email address"
+                placeholder={t("auth.email.placeholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -360,7 +362,7 @@ function LoginPageContent() {
                 <Lock className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/25" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder={mode === "register" ? "Password (min 8 chars)" : "Password"}
+                  placeholder={mode === "register" ? t("auth.password.register") : t("auth.password.placeholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -381,7 +383,7 @@ function LoginPageContent() {
               {mode === "login" && (
                 <div className="mt-1.5 text-right">
                   <a href="/forgot-password" className="text-xs text-white/30 hover:text-violet-400 transition-colors">
-                    Forgot password?
+                    {t("auth.forgot")}
                   </a>
                 </div>
               )}
@@ -395,11 +397,11 @@ function LoginPageContent() {
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  {mode === "register" ? "Creating account..." : "Logging in..."}
+                  {mode === "register" ? t("auth.register.loading") : t("auth.login.loading")}
                 </>
               ) : (
                 <>
-                  {mode === "login" ? "Log in" : "Create account"}
+                  {mode === "login" ? t("auth.login.button") : t("auth.register.button")}
                   <ArrowRight className="size-4" />
                 </>
               )}
@@ -409,7 +411,7 @@ function LoginPageContent() {
           <motion.p variants={fadeInUp} transition={{ duration: 0.4 }} className="mt-6 text-center text-sm text-white/30">
             {mode === "login" ? (
               <>
-                Don&apos;t have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => { setMode("register"); setError(""); }}
@@ -420,7 +422,7 @@ function LoginPageContent() {
               </>
             ) : (
               <>
-                Already have an account?{" "}
+                {t("auth.hasAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => { setMode("login"); setError(""); }}
@@ -437,11 +439,11 @@ function LoginPageContent() {
             transition={{ duration: 0.4 }}
             className="mt-8 text-center text-xs text-white/20"
           >
-            By continuing, you agree to our{" "}
+            {t("auth.agree")}{" "}
             <a href="/privacy" className="text-white/30 underline underline-offset-2 transition-colors hover:text-violet-400">
               Privacy Policy
             </a>{" "}
-            and{" "}
+            {t("auth.and")}{" "}
             <a href="/terms" className="text-white/30 underline underline-offset-2 transition-colors hover:text-violet-400">
               Terms of Service
             </a>

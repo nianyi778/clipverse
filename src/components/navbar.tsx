@@ -67,14 +67,14 @@ export function Navbar() {
   }, []);
 
   const toolsDropdown = [
-    { label: "YouTube Downloader", href: "/youtube" },
-    { label: "TikTok No Watermark", href: "/tiktok" },
-    { label: "Instagram Reels", href: "/instagram" },
-    { label: "Twitter / X Video", href: "/twitter" },
-    { label: "Facebook Video", href: "/facebook" },
-    { label: "Bilibili Downloader", href: "/bilibili" },
-    { label: "抖音下载器", href: "/douyin" },
-    { label: "小红书下载器", href: "/xiaohongshu" },
+    { label: t("nav.tool.youtube"), href: "/youtube" },
+    { label: t("nav.tool.tiktok"), href: "/tiktok" },
+    { label: t("nav.tool.instagram"), href: "/instagram" },
+    { label: t("nav.tool.twitter"), href: "/twitter" },
+    { label: t("nav.tool.facebook"), href: "/facebook" },
+    { label: t("nav.tool.bilibili"), href: "/bilibili" },
+    { label: t("nav.tool.douyin"), href: "/douyin" },
+    { label: t("nav.tool.xiaohongshu"), href: "/xiaohongshu" },
   ];
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);

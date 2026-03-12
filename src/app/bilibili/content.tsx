@@ -250,7 +250,7 @@ export default function BilibiliContent() {
                       `/download?url=${encodeURIComponent(extractUrl(url))}`
                     )
                   }
-                  placeholder="Paste Bilibili video link here..."
+                  placeholder={t("download.placeholder")}
                   className="min-w-0 flex-1 bg-transparent px-4 py-3 text-base text-white outline-none placeholder:text-white/25"
                 />
                 <button

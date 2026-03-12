@@ -191,6 +191,7 @@ function PlatformMarqueeRow({ prefix }: { prefix: string }) {
 }
 
 function ProcessAnimation() {
+  const { t } = useI18n();
   const [step, setStep] = useState(0);
 
   useEffect(() => {
@@ -233,10 +234,10 @@ function ProcessAnimation() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white/80">
-                      Analyzing URL
+                      {t("home.process.analyzing")}
                     </p>
                     <p className="text-xs text-white/30">
-                      Detecting platform...
+                      {t("home.process.detecting")}
                     </p>
                   </div>
                 </div>
@@ -271,10 +272,10 @@ function ProcessAnimation() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white/80">
-                      Processing Video
+                      {t("home.process.processing")}
                     </p>
                     <p className="text-xs text-white/30">
-                      Extracting 1080p MP4...
+                      {t("home.process.extracting")}
                     </p>
                   </div>
                 </div>
@@ -315,7 +316,7 @@ function ProcessAnimation() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-emerald-400">
-                      Download Ready
+                      {t("home.process.ready")}
                     </p>
                     <p className="text-xs text-white/30">
                       video_1080p.mp4 — 24.5 MB
@@ -332,7 +333,7 @@ function ProcessAnimation() {
                   className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 py-2.5 text-sm font-medium text-white"
                 >
                   <Download className="size-4" />
-                  Save to Device
+                  {t("home.process.save")}
                 </motion.div>
               </motion.div>
             )}
@@ -686,7 +687,7 @@ export default function Home() {
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-violet-400"
             >
-              Features
+              {t("home.features.label")}
             </motion.p>
             <motion.h2
               variants={fadeInUp}
@@ -743,7 +744,7 @@ export default function Home() {
               variants={fadeInUp}
               className="mb-3 text-sm font-medium uppercase tracking-widest text-pink-400"
             >
-              Testimonials
+              {t("home.testimonials.label")}
             </motion.p>
             <motion.h2
               variants={fadeInUp}

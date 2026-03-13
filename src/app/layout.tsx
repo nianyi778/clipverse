@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://clipverse-tan.vercel.app";
+const siteUrl = "https://clipverse.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -75,9 +75,45 @@ export default async function RootLayout({
     DEFAULT_LOCALE
   );
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: "ClipVerse",
+        url: siteUrl,
+        logo: `${siteUrl}/logo.png`,
+        sameAs: [],
+        contactPoint: {
+          "@type": "ContactPoint",
+          email: "support@clipverse.app",
+          contactType: "customer service",
+        },
+      },
+      {
+        "@type": "WebApplication",
+        name: "ClipVerse",
+        url: siteUrl,
+        applicationCategory: "MultimediaApplication",
+        operatingSystem: "Any",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+        description:
+          "Free HD video downloader for YouTube, TikTok, Instagram, Bilibili & 50+ platforms.",
+      },
+    ],
+  };
+
   return (
     <html lang={initialLocale} className={`dark ${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Providers initialLocale={initialLocale}>{children}</Providers>
       </body>
     </html>

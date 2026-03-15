@@ -162,6 +162,7 @@ describe("POST /download - input validation", () => {
     vi.mocked(ytdlp.getMergedDownloadUrl).mockResolvedValueOnce({
       streamUrl: "https://cdn.example.com/merged.mp4",
       filename: "merged.mp4",
+      requiresMuxing: true,
     });
 
     const res = await req("POST", "/download", {
@@ -171,6 +172,7 @@ describe("POST /download - input validation", () => {
     const json = await res.json() as Record<string, unknown>;
     expect(json.success).toBe(true);
     expect(json.downloadUrl).toBe("https://cdn.example.com/merged.mp4");
+    expect(json.requiresMuxing).toBe(true);
     expect(vi.mocked(ytdlp.getMergedDownloadUrl)).toHaveBeenCalledWith(
       "https://www.youtube.com/watch?v=abc123", "137", "140"
     );

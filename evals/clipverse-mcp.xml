@@ -1,0 +1,42 @@
+<evaluation>
+  <qa_pair>
+    <question>What is the MCP server name returned by initialize?</question>
+    <answer>clipverse</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many tools are exposed by tools/list?</question>
+    <answer>4</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What is the exact name of the tool that parses a supported video URL and returns metadata?</question>
+    <answer>clipverse_parse_video</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many resources are exposed by resources/list?</question>
+    <answer>3</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Which resource URI contains the developer overview document?</question>
+    <answer>clipverse://docs/developer-overview</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many prompts are exposed by prompts/list?</question>
+    <answer>2</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Which prompt should be used to create a third-party integration plan for ClipVerse?</question>
+    <answer>clipverse_integration_plan</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Which prompt requires a video URL argument to guide download preparation?</question>
+    <answer>clipverse_download_operator</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Which MCP method should be called to retrieve the server's resource inventory?</question>
+    <answer>resources/list</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What protocol version string does initialize return?</question>
+    <answer>2024-11-05</answer>
+  </qa_pair>
+</evaluation>

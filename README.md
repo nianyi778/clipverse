@@ -16,6 +16,7 @@
 - **User accounts** — Google OAuth and email/password via Auth.js
 - **Subscription plans** — Free, Pro, Lifetime, and Team tiers via Stripe
 - **API keys** — programmatic access for Pro+ users
+- **Developer mode** — REST API, MCP endpoint, discovery document, and OpenAPI export
 - **Per-platform proxy support** — configure separate proxies for TikTok, Bilibili, Douyin, etc.
 - **Cookie-based auth** — mount cookie files for platforms that require login
 
@@ -132,6 +133,9 @@ cp .env.example .env.local
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `YTDLP_SERVICE_URL` | Internal URL of the yt-dlp service (server-side) |
 | `YTDLP_API_KEY` | Shared secret between Next.js and ytdlp-service |
+| `ENABLE_DEVELOPER_MODE` | Enable developer-facing API and MCP integrations |
+| `DEVELOPER_REST_ALLOWED_PLANS` | Comma-separated plans allowed to use REST with API keys |
+| `DEVELOPER_MCP_ALLOWED_PLANS` | Comma-separated plans allowed to use MCP |
 | `NEXT_PUBLIC_YTDLP_PROXY_URL` | Public-facing proxy URL for the yt-dlp service |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
@@ -176,6 +180,14 @@ Start the yt-dlp service (port 8787):
 cd ytdlp-service
 pnpm dev
 ```
+
+### Developer integration
+
+- REST docs: `/api-docs`
+- OpenAPI spec: `/openapi.json`
+- MCP discovery: `/.well-known/mcp`
+- MCP endpoint: `/api/mcp`
+- Example MCP config: `templates/mcp/clipverse.mcp.json`
 
 ---
 

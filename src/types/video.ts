@@ -86,5 +86,6 @@ export interface DownloadResponse {
   success: boolean;
   downloadUrl?: string;
   filename?: string;
+  requiresMuxing?: boolean;
   error?: string;
 }

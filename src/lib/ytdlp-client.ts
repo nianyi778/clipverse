@@ -29,7 +29,13 @@ export async function getDownload(params: {
   type: string;
   audioFormatId?: string;
 }) {
-  return callService<{ success: boolean; downloadUrl?: string; filename?: string; error?: string }>("/download", params);
+  return callService<{
+    success: boolean;
+    downloadUrl?: string;
+    filename?: string;
+    requiresMuxing?: boolean;
+    error?: string;
+  }>("/download", params);
 }
 
 export async function getSubtitles(url: string) {

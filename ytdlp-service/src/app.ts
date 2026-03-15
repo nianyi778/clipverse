@@ -144,7 +144,7 @@ app.post("/download", async (c) => {
       return c.json({ success: false, error: "Missing required parameters" }, 400);
     }
 
-    let result: { streamUrl: string; filename: string };
+    let result: { streamUrl: string; filename: string; requiresMuxing?: boolean };
 
     if (type === "video" && audioFormatId) {
       result = await getMergedDownloadUrl(url, formatId, audioFormatId);
@@ -156,7 +156,12 @@ app.post("/download", async (c) => {
       return c.json({ success: false, error: "Could not retrieve download URL" }, 500);
     }
 
-    return c.json({ success: true, downloadUrl: result.streamUrl, filename: result.filename });
+    return c.json({
+      success: true,
+      downloadUrl: result.streamUrl,
+      filename: result.filename,
+      requiresMuxing: result.requiresMuxing || false,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Download failed";
     return c.json({ success: false, error: message }, 500);

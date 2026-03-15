@@ -422,7 +422,15 @@ export default function DashboardPage() {
                   <Key className="size-4 text-white/30" />
                   <h2 className="text-sm font-semibold text-white/70">API Keys</h2>
                 </div>
-                <span className="text-xs text-white/30">{apiKeys.length}/10 keys</span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href="/developers"
+                    className="text-xs text-violet-400 transition-colors hover:text-violet-300"
+                  >
+                    Developer mode
+                  </a>
+                  <span className="text-xs text-white/30">{apiKeys.length}/10 keys</span>
+                </div>
               </div>
 
               {newKeyValue && (

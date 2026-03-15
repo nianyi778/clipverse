@@ -104,7 +104,9 @@ export function VideoResultCard({ video }: { video: ParsedVideo }) {
       const filename = data.filename || `${video.title || "download"}.mp4`;
       
       const isHlsStream = data.downloadUrl?.includes(".m3u8");
-      const needsYtdlp = !data.downloadUrl || isHlsStream;
+      const needsYtdlp = Boolean(
+        data.requiresMuxing || body.audioFormatId || !data.downloadUrl || isHlsStream
+      );
       
       if (needsYtdlp) {
         const params = new URLSearchParams({

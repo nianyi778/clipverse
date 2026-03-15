@@ -209,6 +209,7 @@ export async function getMergedDownloadUrl(url: string, videoFormatId: string, a
   return {
     streamUrl: urls[0] || "",
     filename: sanitizeFilename(data.title || "clipverse_download") + ".mp4",
+    requiresMuxing: urls.length > 1 || Boolean(audioFormatId),
   };
 }
 

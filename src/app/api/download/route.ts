@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectPlatform } from "@/lib/platform-detect";
+import { getAuthorizedUserPlan, getDeveloperModeConfig, isPlanAllowed } from "@/lib/developer-mode";
 import { getDownload } from "@/lib/ytdlp-client";
-import { auth } from "@/lib/auth";
 import {
   checkDownloadQuota,
   incrementDownloadCount,
@@ -9,6 +9,7 @@ import {
   updateDownloadStatus,
 } from "@/db/queries";
 import type { DownloadResponse } from "@/types/video";
+import { authenticateRequest } from "@/lib/request-auth";
 
 export async function POST(request: NextRequest): Promise<NextResponse<DownloadResponse>> {
   try {
@@ -28,8 +29,33 @@ export async function POST(request: NextRequest): Promise<NextResponse<DownloadR
       );
     }
 
-    const session = await auth();
-    const userId = session?.user?.id;
+    const authResult = await authenticateRequest(request);
+    if (authResult.hadApiKey && !authResult.apiKeyValid) {
+      return NextResponse.json(
+        { success: false, error: "Invalid API key" },
+        { status: 401 }
+      );
+    }
+
+    if (authResult.authType === "api_key") {
+      const config = getDeveloperModeConfig();
+      if (!config.enabled) {
+        return NextResponse.json(
+          { success: false, error: "Developer mode is disabled" },
+          { status: 403 }
+        );
+      }
+
+      const plan = await getAuthorizedUserPlan(authResult);
+      if (!isPlanAllowed(plan, config.restAllowedPlans)) {
+        return NextResponse.json(
+          { success: false, error: "Current plan does not allow developer API access" },
+          { status: 403 }
+        );
+      }
+    }
+
+    const userId = authResult.userId;
 
     if (userId) {
       const quota = await checkDownloadQuota(userId);
@@ -56,7 +82,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<DownloadR
         })
       : null;
 
-    let result: { success: boolean; downloadUrl?: string; filename?: string; error?: string };
+    let result: {
+      success: boolean;
+      downloadUrl?: string;
+      filename?: string;
+      requiresMuxing?: boolean;
+      error?: string;
+    };
 
     try {
       result = await getDownload({ url, formatId, type, audioFormatId });
@@ -92,6 +124,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<DownloadR
       success: true,
       downloadUrl: result.downloadUrl,
       filename: result.filename,
+      requiresMuxing: result.requiresMuxing || false,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Download failed";

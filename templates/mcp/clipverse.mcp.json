@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "clipverse": {
+      "type": "http",
+      "url": "https://clipverse.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer CLIPVERSE_API_KEY"
+      }
+    }
+  }
+}

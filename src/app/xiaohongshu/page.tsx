@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "免费下载小红书视频和图集，无水印高清画质。支持笔记保存、直播下载、批量操作。",
     type: "website",
-    url: "https://clipverse.app/xiaohongshu",
+    url: "/xiaohongshu",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "免费下载小红书视频和图集，无水印高清画质。支持笔记保存、直播下载、批量操作。",
   },
   alternates: {
-    canonical: "https://clipverse.app/xiaohongshu",
+    canonical: "/xiaohongshu",
   },
 };
 

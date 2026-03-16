@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description:
       "Start free or upgrade for unlimited downloads, higher quality, and API access. No hidden fees.",
   },
+  alternates: { canonical: "/pricing" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

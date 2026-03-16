@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Download TikTok videos without watermark in HD. Save slideshows, extract audio, batch download.",
     type: "website",
-    url: "https://clipverse.app/tiktok",
+    url: "/tiktok",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Download TikTok videos without watermark in HD quality. Free and fast.",
   },
   alternates: {
-    canonical: "https://clipverse.app/tiktok",
+    canonical: "/tiktok",
   },
 };
 

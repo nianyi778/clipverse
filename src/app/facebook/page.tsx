@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Download Facebook videos in HD and 4K. Save Reels, Stories, and Live replays. Fast and free.",
     type: "website",
-    url: "https://clipverse.app/facebook",
+    url: "/facebook",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Download Facebook videos in HD and 4K. Save Reels, Stories, Live replays.",
   },
   alternates: {
-    canonical: "https://clipverse.app/facebook",
+    canonical: "/facebook",
   },
 };
 

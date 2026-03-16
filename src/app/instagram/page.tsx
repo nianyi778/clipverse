@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Download Instagram Reels, Stories, and IGTV in HD. Save carousels and profile pictures. Fast and free.",
     type: "website",
-    url: "https://clipverse.app/instagram",
+    url: "/instagram",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Download Instagram Reels, Stories, IGTV in HD. Save carousels and profile pictures.",
   },
   alternates: {
-    canonical: "https://clipverse.app/instagram",
+    canonical: "/instagram",
   },
 };
 

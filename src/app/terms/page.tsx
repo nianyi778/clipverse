@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 export const metadata: Metadata = {
   title: "Terms of Service | ClipVerse",
   description: "ClipVerse terms of service and user agreement",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

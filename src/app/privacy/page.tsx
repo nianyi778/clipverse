@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 export const metadata: Metadata = {
   title: "Privacy Policy | ClipVerse",
   description: "ClipVerse privacy policy and data protection information",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

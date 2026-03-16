@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Download Bilibili videos in 4K, Dolby Vision. VIP content without login. Episodes, danmaku, bangumi.",
     type: "website",
-    url: "https://clipverse.app/bilibili",
+    url: "/bilibili",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Download Bilibili videos in 4K, Dolby Vision. VIP/大会员 content without login.",
   },
   alternates: {
-    canonical: "https://clipverse.app/bilibili",
+    canonical: "/bilibili",
   },
 };
 

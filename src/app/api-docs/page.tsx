@@ -110,7 +110,7 @@ const openApiSpec = `GET $ORIGIN/openapi.json`;
 const repoTemplate = `templates/mcp/clipverse.mcp.json`;
 
 export default function APIDocsPage() {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://clipverse.app";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://clipverse.divinations.top";
   const mcpEndpoint = `${origin}/api/mcp`;
   const discoveryEndpoint = `${origin}/.well-known/mcp`;
 

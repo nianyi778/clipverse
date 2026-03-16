@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Download YouTube videos in 4K, 8K, and HD. Save Shorts, extract audio, download playlists. Fast and free.",
     type: "website",
-    url: "https://clipverse.app/youtube",
+    url: "/youtube",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Download YouTube videos in 4K, 8K quality. Save Shorts, extract audio, download playlists.",
   },
   alternates: {
-    canonical: "https://clipverse.app/youtube",
+    canonical: "/youtube",
   },
 };
 

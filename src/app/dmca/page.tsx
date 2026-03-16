@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 export const metadata: Metadata = {
   title: "DMCA Policy | ClipVerse",
   description: "ClipVerse DMCA policy and copyright infringement procedures",
+  alternates: { canonical: "/dmca" },
 };
 
 export default function DMCAPage() {

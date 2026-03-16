@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "免费下载抖音视频，去水印高清原画。支持音频提取、图集保存、批量下载。",
     type: "website",
-    url: "https://clipverse.app/douyin",
+    url: "/douyin",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "免费下载抖音视频，去水印高清原画。支持音频提取、图集保存、批量下载。",
   },
   alternates: {
-    canonical: "https://clipverse.app/douyin",
+    canonical: "/douyin",
   },
 };
 

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description:
       "Download videos directly from any website with one click. Supports 50+ platforms.",
   },
-  alternates: { canonical: "https://clipverse.app/chrome-extension" },
+  alternates: { canonical: "/chrome-extension" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

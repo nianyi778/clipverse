@@ -212,7 +212,7 @@ function ProcessAnimation() {
           <div className="size-2.5 rounded-full bg-white/10" />
           <div className="ml-2 flex h-5 flex-1 items-center rounded-md bg-white/[0.04] px-3">
             <span className="text-[10px] text-white/20">
-              clipverse.app/download
+              clipverse.divinations.top/download
             </span>
           </div>
         </div>

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Download Twitter/X videos, GIFs, and Spaces audio in HD. Save tweet media and threads. Fast and free.",
     type: "website",
-    url: "https://clipverse.app/twitter",
+    url: "/twitter",
     siteName: "ClipVerse",
   },
   twitter: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Download Twitter/X videos, GIFs, Spaces audio in HD. Save tweet media and thread content.",
   },
   alternates: {
-    canonical: "https://clipverse.app/twitter",
+    canonical: "/twitter",
   },
 };
 

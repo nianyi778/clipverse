@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description:
       "Get in touch with the ClipVerse team for questions, feedback, and support.",
   },
-  alternates: { canonical: "https://clipverse.app/contact" },
+  alternates: { canonical: "/contact" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

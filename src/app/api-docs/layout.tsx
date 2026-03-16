@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description:
       "Integrate video downloading into your apps with the ClipVerse API.",
   },
-  alternates: { canonical: "https://clipverse.app/api-docs" },
+  alternates: { canonical: "/api-docs" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

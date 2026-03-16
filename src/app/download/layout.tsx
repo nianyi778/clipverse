@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description:
       "Paste any video URL and download in HD or 4K. Supports YouTube, TikTok, Instagram, Bilibili, Twitter and 50+ sites.",
   },
+  alternates: { canonical: "/download" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

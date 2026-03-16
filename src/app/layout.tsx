@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { cookies, headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { DEFAULT_LOCALE, detectLocale, LOCALE_COOKIE_NAME } from "@/lib/locale";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
+
+const GA_ID = "G-K97D0JLSGK";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://clipverse.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -24,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | ClipVerse",
   },
   description:
-    "Free HD video downloader for YouTube, TikTok, Instagram, Bilibili & 50+ platforms. 4K quality, no watermark, no software needed.",
+    "Free HD video downloader for YouTube, TikTok, Instagram, Bilibili & 50+ platforms. 4K quality, no watermark. Developer API & MCP endpoint for AI integration.",
   keywords: [
     "video downloader",
     "youtube downloader",
@@ -109,6 +113,12 @@ export default async function RootLayout({
 
   return (
     <html lang={initialLocale} className={`dark ${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA_ID}')`}
+        </Script>
+      </head>
       <body className="antialiased">
         <script
           type="application/ld+json"

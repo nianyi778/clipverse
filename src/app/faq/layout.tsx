@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description:
       "Answers to common questions about ClipVerse video downloader.",
   },
-  alternates: { canonical: "https://clipverse.app/faq" },
+  alternates: { canonical: "/faq" },
 };
 
 const faqItems = [

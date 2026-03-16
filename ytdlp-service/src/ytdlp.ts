@@ -51,7 +51,6 @@ export function getPlatformArgs(url: string): string[] {
 
   if (isYouTube) {
     if (BGUTIL_POT_URL) {
-      extra.push("--extractor-args", "youtube:player_client=mweb");
       extra.push("--extractor-args", `youtubepot-bgutilhttp:base_url=${BGUTIL_POT_URL}`);
     }
     extra.push(...cookiesArg(YOUTUBE_COOKIES));

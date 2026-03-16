@@ -45,7 +45,9 @@ export async function POST(request: NextRequest) {
 
     const verifyToken = crypto.randomBytes(32).toString("hex");
     await setEmailVerifyToken(userId, verifyToken);
-    sendVerificationEmail(email, verifyToken).catch(() => {});
+    sendVerificationEmail(email, verifyToken).catch((err) => {
+      console.error("Failed to send verification email:", err);
+    });
 
     return NextResponse.json({ success: true, userId });
   } catch (error) {

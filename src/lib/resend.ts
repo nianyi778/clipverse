@@ -3,7 +3,7 @@ import { Resend } from "resend";
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FROM = "ClipVerse <onboarding@resend.dev>";
-const BASE_URL = process.env.AUTH_URL || "https://clipverse-tan.vercel.app";
+const BASE_URL = process.env.AUTH_URL || "https://clipverse.divinations.top";
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const link = `${BASE_URL}/reset-password?token=${token}`;

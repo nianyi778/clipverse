@@ -1,5 +1,5 @@
 (() => {
-  const API_BASE = "https://clipverse.com";
+  const API_BASE = "https://clipverse.divinations.top";
   const BUTTON_ID = "clipverse-download-btn";
   const TOAST_ID = "clipverse-toast";
 

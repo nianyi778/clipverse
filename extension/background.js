@@ -1,4 +1,4 @@
-const API_BASE = "https://clipverse.com";
+const API_BASE = "https://clipverse.divinations.top";
 
 const SUPPORTED_DOMAINS = [
   "youtube.com", "youtu.be", "tiktok.com", "instagram.com",
